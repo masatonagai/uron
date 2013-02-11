@@ -4,4 +4,4 @@ struct cron_struct {
   char *day_of_month;
 };
 
-int get_crons(struct cron_struct **, char **);
+void getcrons(struct cron_struct **, char **, int);
