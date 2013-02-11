@@ -5,6 +5,10 @@ struct cron_struct {
   char *minute;
   char *hour;
   char *day_of_month;
+  char *month;
+  char *day_of_week;
+  char *username;
+  char *command;
 };
 
 int fgetcrons(struct cron_struct **, FILE *stream);
