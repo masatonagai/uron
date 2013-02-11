@@ -5,10 +5,11 @@
 #include "cron.h"
 
 static int test_fgetcrons() {
-  int expect_cronc = 2;
+  int expect_cronc = 3;
   struct cron_struct expect_crons[] = {
-    "10", "*", "*",
-    "0", "23", "31"
+    "0", "8", "*",
+    "0", "12", "*",
+    "0", "22", "*"
   };
 
   FILE *stream;
@@ -26,11 +27,11 @@ static int test_fgetcrons() {
   char expect_cronx[LINE_MAX];
   char actual_cronx[LINE_MAX];
   for (i = 0; i < expect_cronc; i++) {
-    sscanf(expect_cronx, "%s %s %s",
+    sprintf(expect_cronx, "%s %s %s",
         expect_crons[i].minute,
         expect_crons[i].hour,
         expect_crons[i].day_of_month);
-    sscanf(actual_cronx, "%s %s %s",
+    sprintf(actual_cronx, "%s %s %s",
         actual_crons[i].minute,
         actual_crons[i].hour,
         actual_crons[i].day_of_month);

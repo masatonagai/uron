@@ -6,21 +6,27 @@
 static char buff[LINE_MAX];
 
 int fgetcrons(struct cron_struct **crons, FILE *stream) {
+  (*crons) = NULL;
   int cron_c;
   for (;;) {
     if (fgets(buff, LINE_MAX, stream) == NULL) {
       break;
     }
     (*crons) =
-      (struct cron_struct *) realloc(
-          (*crons),
-          sizeof(struct cron_struct) * (cron_c + 1));
+      (struct cron_struct *)
+      realloc(
+        (*crons),
+        sizeof(struct cron_struct) * (cron_c + 1));
+    struct cron_struct *cron = &(*crons)[cron_c];
+    (*cron).minute = malloc(2 + 1);
+    (*cron).hour = malloc(2 + 1);
+    (*cron).day_of_month = malloc(2 + 1);
     sscanf(
       buff,
       "%s %s %s",
-      (*crons)[cron_c].minute,
-      (*crons)[cron_c].hour,
-      (*crons)[cron_c].day_of_month);
+      (*cron).minute,
+      (*cron).hour,
+      (*cron).day_of_month);
     cron_c++;
   }
   return cron_c;
