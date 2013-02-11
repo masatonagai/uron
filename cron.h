@@ -4,4 +4,5 @@ struct cron_struct {
   char *day_of_month;
 };
 
+int fgetcrons(struct cron_struct **, FILE *stream);
 void getcrons(struct cron_struct **, char **, int);

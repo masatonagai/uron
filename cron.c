@@ -1,6 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 #include "cron.h"
+
+static char buff[LINE_MAX];
+
+int fgetcrons(struct cron_struct **crons, FILE *stream) {
+  int cron_c;
+  for (;;) {
+    if (fgets(buff, LINE_MAX, stream) == NULL) {
+      break;
+    }
+    (*crons) =
+      (struct cron_struct *) realloc(
+          (*crons),
+          sizeof(struct cron_struct) * (cron_c + 1));
+    sscanf(
+      buff,
+      "%s %s %s",
+      (*crons)[cron_c].minute,
+      (*crons)[cron_c].hour,
+      (*crons)[cron_c].day_of_month);
+    cron_c++;
+  }
+  return cron_c;
+}
 
 void getcrons(struct cron_struct **crons, char **cron_xs, int cron_c) {
   (*crons) = (struct cron_struct *) calloc(cron_c, sizeof(struct cron_struct));
