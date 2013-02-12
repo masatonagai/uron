@@ -7,11 +7,12 @@ int main(int argc, char **argv) {
   int cron_c = dgetcrons(&crons, "/etc/cron.d/");
   int i;
   printf(
-      "%2s  %2s  %2s  %3s  %3s  %10s  %30s\n",
-      "i", "h", "d", "m", "w", "u", "c");
+      "%4s  %4s  %4s  %4s  %4s  %4s  %10s  %s\n",
+      "NO", "MI", "HR", "DM", "MO", "DW", "USR", "CMD");
   for (i = 0; i < cron_c; i++) {
     printf(
-      "%2s  %2s  %2s  %3s  %3s  %10s  %30s\n",
+      "%4d  %4s  %4s  %4s  %4s  %4s  %10s  %s\n",
+      i,
       crons[i].minute,
       crons[i].hour,
       crons[i].day_of_month,
