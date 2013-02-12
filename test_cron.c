@@ -4,6 +4,25 @@
 #include <string.h>
 #include "cron.h"
 
+static int test_dgetcrons() {
+  struct cron_struct *actual_crons;
+  int cron_c = dgetcrons(&actual_crons, "./dummy_cron.d/");
+  int i;
+  for (i = 0; i < cron_c; i++) {
+    printf(
+        "%s %s %s %s %s %s %s\n",
+        actual_crons[i].minute,
+        actual_crons[i].hour,
+        actual_crons[i].day_of_month,
+        actual_crons[i].month,
+        actual_crons[i].day_of_week,
+        actual_crons[i].username,
+        actual_crons[i].command);
+  }
+  free(actual_crons);
+  return EXIT_SUCCESS;
+}
+
 static int test_fgetcrons() {
   int expect_cronc = 3;
   struct cron_struct expect_crons[] = {
@@ -14,11 +33,10 @@ static int test_fgetcrons() {
   };
 
   FILE *stream;
-  stream = fopen("dummy_cron", "r");
+  stream = fopen("./dummy_cron.d/cron1", "r");
   struct cron_struct *actual_crons;
   int actual_cronc = fgetcrons(&actual_crons, stream);
   fclose(stream);
-
   if (expect_cronc != actual_cronc) {
     fprintf(stderr, "%s:%d failed. expected=%d, actual=%d\n", __FILE__, __LINE__, expect_cronc, actual_cronc);
     return EXIT_FAILURE;
@@ -90,7 +108,9 @@ static int test_getcrons() {
 }
 
 int main(int argc, char **argv) {
-  if (/*test_getcrons() == EXIT_SUCCESS && */ test_fgetcrons() == EXIT_SUCCESS) {
+  if (test_getcrons() == EXIT_SUCCESS &&
+      test_fgetcrons() == EXIT_SUCCESS &&
+      test_dgetcrons() == EXIT_SUCCESS) {
     fprintf(stdout, "%s succeeded.\n", __FILE__);
     return EXIT_SUCCESS;
   }

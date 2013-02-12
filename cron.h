@@ -11,6 +11,7 @@ struct cron_struct {
   char *command;
 };
 
+int dgetcrons(struct cron_struct **, char *dirname);
 int fgetcrons(struct cron_struct **, FILE *stream);
 void getcrons(struct cron_struct **, char **, int);
 
