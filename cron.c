@@ -46,9 +46,16 @@ int fgetcrons(struct cron_struct **crons, FILE *stream) {
   char buff[LINE_MAX];
   int cron_c = 0;
   for (;;) {
+    const char *line;
     if (fgets(buff, LINE_MAX, stream) == NULL) {
       break;
     }
+    char c[2];
+    sscanf(buff, "%s", c);
+    if (c[0] == '#') {
+      continue;
+    }
+
     struct cron_struct *cron = malloc(sizeof(struct cron_struct));
     (*cron).minute = malloc(2 + 1);           // 0-59
     (*cron).hour = malloc(2 + 1);             // 0-23
