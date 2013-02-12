@@ -8,7 +8,7 @@ static char buff[LINE_MAX];
 
 int fgetcrons(struct cron_struct **crons, FILE *stream) {
   (*crons) = NULL;
-  int cron_c;
+  int cron_c = 0;
   for (;;) {
     if (fgets(buff, LINE_MAX, stream) == NULL) {
       break;
