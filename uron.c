@@ -58,4 +58,5 @@ int main(int argc, char **argv) {
         crons[i].username,
         crons[i].command);
   }
+  return EXIT_SUCCESS;
 }

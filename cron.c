@@ -27,7 +27,7 @@ struct cron_struct * getcron(const char *s) {
         SP,MIN,SP,HR, SP,DOM,SP,MON,SP,DOW,SP,USR,SP,CMD,SP
       );
   if (regcomp(&regex, pattern, REG_EXTENDED) != REG_NOERROR) {
-    fprintf(stderr, "faild to compile regex. pattern=%s\n");
+    fprintf(stderr, "faild to compile regex. pattern=%s\n", pattern);
     exit(EXIT_FAILURE);
   }
   if (regexec(&regex, s, (size_t) N_MATCH, pmatch, 0) != REG_NOERROR) {
@@ -100,7 +100,6 @@ int fgetcrons(struct cron_struct **crons, FILE *stream) {
   char buff[LINE_MAX];
   int cron_c = 0;
   for (;;) {
-    const char *line;
     if (fgets(buff, LINE_MAX, stream) == NULL) {
       break;
     }
