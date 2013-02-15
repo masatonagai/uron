@@ -4,8 +4,62 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <string.h>
+#include <regex.h>
 #include "cron.h"
 
+#define N_MATCH 8
+#define MIN "[0-9*/,-]+"
+#define HR  "[0-9*/,-]+"
+#define DOM "[0-9*/,-LW]+"
+#define MON "[0-9a-zA-Z*/,-]+"
+// #define YR "[0-9*/,-]+"
+#define DOW "[0-6a-zA-Z*/,-L#]+"
+#define USR "[a-z][-a-z0-9]*"
+#define CMD "[^\r\n]+"
+#define SP "[[:space:]]"
+
+struct cron_struct * getcron(const char *s) {
+  regex_t regex;
+  regmatch_t pmatch[N_MATCH];
+  char pattern[256];
+  sprintf(pattern,
+      "^%s*(%s)%s+(%s)%s+(%s)%s+(%s)%s+(%s)%s+(%s)%s+(%s)%s*$",
+        SP,MIN,SP,HR, SP,DOM,SP,MON,SP,DOW,SP,USR,SP,CMD,SP
+      );
+  if (regcomp(&regex, pattern, REG_EXTENDED) != REG_NOERROR) {
+    fprintf(stderr, "faild to compile regex. pattern=%s\n");
+    exit(EXIT_FAILURE);
+  }
+  if (regexec(&regex, s, (size_t) N_MATCH, pmatch, 0) != REG_NOERROR) {
+    return NULL;
+  }
+
+  char *match[N_MATCH];
+  int match_c;
+  for (match_c = 0; match_c < N_MATCH; match_c++) {
+    regmatch_t m = pmatch[match_c];
+    if (m.rm_so == -1) {
+      break;
+    }
+    size_t len = m.rm_eo - m.rm_so;
+    match[match_c] = (char *) malloc(len + 1);
+    strncpy(match[match_c], s + m.rm_so, len);
+    match[match_c][len] = '\0';
+  }
+  if (match_c != N_MATCH) {
+    return NULL;
+  }
+  struct cron_struct *cron =
+    (struct cron_struct *) malloc(sizeof(struct cron_struct));
+  (*cron).minute = strdup(match[1]);
+  (*cron).hour = strdup(match[2]);
+  (*cron).day_of_month = strdup(match[3]);
+  (*cron).month = strdup(match[4]);
+  (*cron).day_of_week = strdup(match[5]);
+  (*cron).username = strdup(match[6]);
+  (*cron).command = strdup(match[7]);
+  return cron;
+}
 
 int dgetcrons(struct cron_struct **crons, char *dirname) {
   (*crons) = NULL;
@@ -50,32 +104,8 @@ int fgetcrons(struct cron_struct **crons, FILE *stream) {
     if (fgets(buff, LINE_MAX, stream) == NULL) {
       break;
     }
-    char c[2];
-    sscanf(buff, "%s", c);
-    if (c[0] == '#') {
-      continue;
-    }
-
-    struct cron_struct *cron = malloc(sizeof(struct cron_struct));
-    (*cron).minute = malloc(2 + 1);           // 0-59
-    (*cron).hour = malloc(2 + 1);             // 0-23
-    (*cron).day_of_month = malloc(2 + 1);     // 1-31
-    (*cron).month = malloc(3 + 1);            // 1-12 or jan-dec
-    (*cron).day_of_week = malloc(3 + 1);      // 0-6 or sun-sat
-    (*cron).username = malloc(_SC_LOGIN_NAME_MAX);
-    (*cron).command = malloc(LINE_MAX / 2);
-    int scanned = sscanf(
-      buff,
-      "%s %s %s %s %s %s %[^\n]",
-      (*cron).minute,
-      (*cron).hour,
-      (*cron).day_of_month,
-      (*cron).month,
-      (*cron).day_of_week,
-      (*cron).username,
-      (*cron).command);
-    if (scanned != 7) {
-      free(cron);
+    struct cron_struct *cron = getcron(buff);
+    if (cron == NULL) {
       continue;
     }
     (*crons) =
@@ -83,7 +113,7 @@ int fgetcrons(struct cron_struct **crons, FILE *stream) {
       realloc(
         (*crons),
         sizeof(struct cron_struct) * (cron_c + 1));
-    (*crons)[cron_c] = *cron;
+    (*crons)[cron_c] = (*cron);
     cron_c++;
   }
   return cron_c;

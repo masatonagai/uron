@@ -4,6 +4,36 @@
 #include <string.h>
 #include "cron.h"
 
+static char *crontox(const struct cron_struct cron) {
+  char *cronx = (char *) malloc(LINE_MAX);
+  sprintf(
+      cronx,
+      "%s %s %s %s %s %s %s",
+      cron.minute,
+      cron.hour,
+      cron.day_of_month,
+      cron.month,
+      cron.day_of_week,
+      cron.username,
+      cron.command);
+  return cronx;
+}
+
+static int test_getcron() {
+  const struct cron_struct expect_cron = {
+    "*/5", "10-12", "5L", "mon-fri", "JAN,FEB", "masato", "echo hello" };
+  const char *expect_cronx = crontox(expect_cron);
+
+  const struct cron_struct actual_cron = (*getcron(expect_cronx));
+  char *actual_cronx = crontox(actual_cron);
+
+  if (strcmp(expect_cronx, actual_cronx) != 0) {
+    fprintf(stderr, "%s:%d failed. expected=%s, actual=%s\n", __FILE__, __LINE__, expect_cronx, actual_cronx);
+    return 0;
+  }
+  return 1;
+}
+
 static int test_dgetcrons() {
   struct cron_struct *actual_crons;
   int cron_c = dgetcrons(&actual_crons, "./dummy_cron.d/");
@@ -39,39 +69,20 @@ static int test_fgetcrons() {
   fclose(stream);
   if (expect_cronc != actual_cronc) {
     fprintf(stderr, "%s:%d failed. expected=%d, actual=%d\n", __FILE__, __LINE__, expect_cronc, actual_cronc);
-    return EXIT_FAILURE;
+    return 0;
   }
 
   int i;
-  char expect_cronx[LINE_MAX];
-  char actual_cronx[LINE_MAX];
   for (i = 0; i < expect_cronc; i++) {
-    sprintf(
-        expect_cronx,
-        "%s %s %s %s %s %s %s",
-        expect_crons[i].minute,
-        expect_crons[i].hour,
-        expect_crons[i].day_of_month,
-        expect_crons[i].month,
-        expect_crons[i].day_of_week,
-        expect_crons[i].username,
-        expect_crons[i].command);
-    sprintf(
-        actual_cronx,
-        "%s %s %s %s %s %s %s",
-        actual_crons[i].minute,
-        actual_crons[i].hour,
-        actual_crons[i].day_of_month,
-        actual_crons[i].month,
-        actual_crons[i].day_of_week,
-        actual_crons[i].username,
-        actual_crons[i].command);
+    const char *expect_cronx = crontox(expect_crons[i]);
+    const char *actual_cronx = crontox(actual_crons[i]);
+    printf("%c <=> %c\n", expect_cronx[strlen(expect_cronx)-1], actual_cronx[strlen(actual_cronx)-1]);
     if (strcmp(expect_cronx, actual_cronx) != 0) {
       fprintf(stderr, "%s:%d failed. expected=%s, actual=%s\n", __FILE__, __LINE__, expect_cronx, actual_cronx);
-      return EXIT_FAILURE;
+      return 0;
     }
   }
-  return EXIT_SUCCESS;
+  return 1;
 }
 
 static int test_getcrons() {
@@ -108,9 +119,7 @@ static int test_getcrons() {
 }
 
 int main(int argc, char **argv) {
-  if (test_getcrons() == EXIT_SUCCESS &&
-      test_fgetcrons() == EXIT_SUCCESS &&
-      test_dgetcrons() == EXIT_SUCCESS) {
+  if (test_getcron() & test_fgetcrons()) {
     fprintf(stdout, "%s succeeded.\n", __FILE__);
     return EXIT_SUCCESS;
   }
