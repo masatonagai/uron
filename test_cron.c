@@ -76,7 +76,6 @@ static int test_fgetcrons() {
   for (i = 0; i < expect_cronc; i++) {
     const char *expect_cronx = crontox(expect_crons[i]);
     const char *actual_cronx = crontox(actual_crons[i]);
-    printf("%c <=> %c\n", expect_cronx[strlen(expect_cronx)-1], actual_cronx[strlen(actual_cronx)-1]);
     if (strcmp(expect_cronx, actual_cronx) != 0) {
       fprintf(stderr, "%s:%d failed. expected=%s, actual=%s\n", __FILE__, __LINE__, expect_cronx, actual_cronx);
       return 0;
