@@ -84,39 +84,6 @@ static int test_fgetcrons() {
   return 1;
 }
 
-static int test_getcrons() {
-  char *cron_xs[] = {
-    "0 8 * * mon masato echo good morning",
-    "0 12 * * mon masato echo good afternoon",
-    "0 22 * * mon masato echo good night"
-  };
-  int cron_c = 2;
-  struct cron_struct *crons;
-  getcrons(&crons, cron_xs, 2);
-
-  int i;
-  char buff[LINE_MAX];
-  for (i = 0; i < cron_c; i++) {
-    struct cron_struct cron = *(crons+i);
-    sprintf(
-        buff,
-        "%s %s %s %s %s %s %s",
-        cron.minute,
-        cron.hour,
-        cron.day_of_month,
-        cron.month,
-        cron.day_of_week,
-        cron.username,
-        cron.command);
-    if (strcmp(buff, cron_xs[i]) != 0) {
-      fprintf(stderr, "%s:%d failed. expected=%s, actual=%s\n", __FILE__, __LINE__, *(cron_xs+i), buff);
-      free(crons);
-      return EXIT_FAILURE;
-    }
-  }
-  return EXIT_SUCCESS;
-}
-
 int main(int argc, char **argv) {
   if (test_getcron() & test_fgetcrons()) {
     fprintf(stdout, "%s succeeded.\n", __FILE__);
