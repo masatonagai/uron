@@ -19,19 +19,32 @@
 
 struct uron_struct {
   unsigned int n;
-  struct cron_struct cron;
+  struct cron_struct *cron;
 };
 
+void freeuron(struct uron_struct *uron) {
+  freecron((*uron).cron);
+  free(uron);
+}
+
+struct uron_struct * makeuron(unsigned int n, struct cron_struct *cron) {
+  struct uron_struct *uron = (struct uron_struct *) xmalloc(sizeof(struct uron_struct));
+  (*uron).n = n;
+  (*uron).cron = cron;
+  return uron;
+}
+
 static void list_crons() {
-  struct cron_struct *crons;
+  struct cron_struct **crons;
   int cron_c = dgetcrons(&crons, CRON_DIR);
   int i;
-  struct uron_struct *urons =
-    (struct uron_struct *) xmalloc(sizeof(struct uron_struct) * cron_c);
+  struct uron_struct **urons =
+    (struct uron_struct **) xmalloc(sizeof(struct uron_struct *) * cron_c);
   for (i = 0; i < cron_c; i++) {
-    struct uron_struct uron = { i, crons[i] };
+    struct uron_struct *uron = makeuron(i, crons[i]);
     urons[i] = uron;
   }
+  free(crons);
 
   int h_no_len = MIN(2, strlen(H_NO));
   int h_min_len = strlen(H_MIN);
@@ -42,14 +55,15 @@ static void list_crons() {
   int h_usr_len = strlen(H_USR);
   int h_cmd_len = strlen(H_CMD);
   for (i = 0; i < cron_c; i++) {
-    struct cron_struct cron = urons[i].cron;
-    h_min_len = MAX(h_min_len, strlen(cron.minute));
-    h_hr_len = MAX(h_hr_len, strlen(cron.hour));
-    h_dom_len = MAX(h_dom_len, strlen(cron.day_of_month));
-    h_mon_len = MAX(h_mon_len, strlen(cron.month));
-    h_dow_len = MAX(h_dow_len, strlen(cron.day_of_week));
-    h_usr_len = MAX(h_usr_len, strlen(cron.username));
-    h_cmd_len = MAX(h_cmd_len, strlen(cron.command));
+    struct uron_struct *uron = urons[i];
+    struct cron_struct *cron = (*uron).cron;
+    h_min_len = MAX(h_min_len, strlen((*cron).minute));
+    h_hr_len = MAX(h_hr_len, strlen((*cron).hour));
+    h_dom_len = MAX(h_dom_len, strlen((*cron).day_of_month));
+    h_mon_len = MAX(h_mon_len, strlen((*cron).month));
+    h_dow_len = MAX(h_dow_len, strlen((*cron).day_of_week));
+    h_usr_len = MAX(h_usr_len, strlen((*cron).username));
+    h_cmd_len = MAX(h_cmd_len, strlen((*cron).command));
   }
   char buff[LINE_MAX];
   sprintf(buff,
@@ -62,19 +76,21 @@ static void list_crons() {
       h_no_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   for (i = 0; i < cron_c; i++) {
-    struct uron_struct uron = urons[i];
-    struct cron_struct cron = uron.cron;
+    struct uron_struct *uron = urons[i];
+    struct cron_struct *cron = (*uron).cron;
     printf(
         buff,
-        uron.n,
-        cron.minute,
-        cron.hour,
-        cron.day_of_month,
-        cron.month,
-        cron.day_of_week,
-        cron.username,
-        cron.command);
+        (*uron).n,
+        (*cron).minute,
+        (*cron).hour,
+        (*cron).day_of_month,
+        (*cron).month,
+        (*cron).day_of_week,
+        (*cron).username,
+        (*cron).command);
+    freeuron(uron);
   }
+  free(urons);
   exit(EXIT_SUCCESS);
 }
 

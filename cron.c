@@ -6,6 +6,7 @@
 #include <string.h>
 #include <regex.h>
 #include "cron.h"
+#include "util.h"
 
 #define N_MATCH 8
 #define MIN "[0-9*/,-]+"
@@ -17,6 +18,31 @@
 #define USR "[a-z][-a-z0-9]*"
 #define CMD "[^\r\n]+"
 #define SP "[[:space:]]"
+
+void freecron(struct cron_struct *cron) {
+  free((*cron).minute);
+  free((*cron).hour);
+  free((*cron).day_of_month);
+  free((*cron).month);
+  free((*cron).day_of_week);
+  free((*cron).username);
+  free((*cron).command);
+  free(cron);
+}
+
+static struct cron_struct * makecron(
+    char *minute, char *hour, char *day_of_month, char *month, char *day_of_week,
+    char *username, char *command) {
+  struct cron_struct *cron = xmalloc(sizeof(struct cron_struct));
+  (*cron).minute = strdup(minute);
+  (*cron).hour = strdup(hour);
+  (*cron).day_of_month = strdup(day_of_month);
+  (*cron).month = strdup(month);
+  (*cron).day_of_week = strdup(day_of_week);
+  (*cron).username = strdup(username);
+  (*cron).command = strdup(command);
+  return cron;
+}
 
 struct cron_struct * getcron(const char *s) {
   regex_t regex;
@@ -31,8 +57,10 @@ struct cron_struct * getcron(const char *s) {
     exit(EXIT_FAILURE);
   }
   if (regexec(&regex, s, (size_t) N_MATCH, pmatch, 0) != REG_NOERROR) {
+    regfree(&regex);
     return NULL;
   }
+  regfree(&regex);
 
   char *match[N_MATCH];
   int match_c;
@@ -49,19 +77,17 @@ struct cron_struct * getcron(const char *s) {
   if (match_c != N_MATCH) {
     return NULL;
   }
-  struct cron_struct *cron =
-    (struct cron_struct *) xmalloc(sizeof(struct cron_struct));
-  (*cron).minute = strdup(match[1]);
-  (*cron).hour = strdup(match[2]);
-  (*cron).day_of_month = strdup(match[3]);
-  (*cron).month = strdup(match[4]);
-  (*cron).day_of_week = strdup(match[5]);
-  (*cron).username = strdup(match[6]);
-  (*cron).command = strdup(match[7]);
+  struct cron_struct *cron = makecron(
+      match[1], match[2], match[3], match[4], match[5],
+      match[6], match[7]);
+  int i;
+  for (i = 0; i < match_c; i++) {
+    free(match[i]);
+  }
   return cron;
 }
 
-int dgetcrons(struct cron_struct **crons, char *dirname) {
+int dgetcrons(struct cron_struct ***crons, char *dirname) {
   (*crons) = NULL;
   int cron_c = 0;
 
@@ -78,14 +104,15 @@ int dgetcrons(struct cron_struct **crons, char *dirname) {
           fprintf(stderr, "failed: open %s\n", path);
           continue;
         }
-        struct cron_struct *_crons;
+        struct cron_struct **_crons;
         int _cron_c = fgetcrons(&_crons, stream);
         (*crons) =
-          (struct cron_struct *)
+          (struct cron_struct **)
           xrealloc(
             (*crons),
-            sizeof(struct cron_struct) * (cron_c + _cron_c));
-        memcpy((*crons) + cron_c, _crons, sizeof(struct cron_struct) * _cron_c);
+            sizeof(struct cron_struct *) * (cron_c + _cron_c));
+        memcpy((*crons) + cron_c, _crons, sizeof(struct cron_struct *) * _cron_c);
+        free(_crons);
         cron_c += _cron_c;
         fclose(stream);
       }
@@ -95,7 +122,7 @@ int dgetcrons(struct cron_struct **crons, char *dirname) {
   return cron_c;
 }
 
-int fgetcrons(struct cron_struct **crons, FILE *stream) {
+int fgetcrons(struct cron_struct ***crons, FILE *stream) {
   (*crons) = NULL;
   char line[LINE_MAX];
   int cron_c = 0;
@@ -108,11 +135,11 @@ int fgetcrons(struct cron_struct **crons, FILE *stream) {
       continue;
     }
     (*crons) =
-      (struct cron_struct *)
+      (struct cron_struct **)
       xrealloc(
         (*crons),
-        sizeof(struct cron_struct) * (cron_c + 1));
-    (*crons)[cron_c] = (*cron);
+        sizeof(struct cron_struct *) * (cron_c + 1));
+    (*crons)[cron_c] = cron;
     cron_c++;
   }
   return cron_c;

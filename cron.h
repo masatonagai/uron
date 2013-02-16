@@ -13,8 +13,9 @@ struct cron_struct {
   char *command;
 };
 
-int dgetcrons(struct cron_struct **, char *);
-int fgetcrons(struct cron_struct **, FILE *);
+int dgetcrons(struct cron_struct ***, char *);
+int fgetcrons(struct cron_struct ***, FILE *);
 struct cron_struct * getcron(const char *);
+void freecron(struct cron_struct *);
 
 #endif /* CRON_H */
