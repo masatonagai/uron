@@ -42,7 +42,7 @@ struct cron_struct * getcron(const char *s) {
       break;
     }
     size_t len = m.rm_eo - m.rm_so;
-    match[match_c] = (char *) malloc(len + 1);
+    match[match_c] = (char *) xmalloc(len + 1);
     strncpy(match[match_c], s + m.rm_so, len);
     match[match_c][len] = '\0';
   }
@@ -50,7 +50,7 @@ struct cron_struct * getcron(const char *s) {
     return NULL;
   }
   struct cron_struct *cron =
-    (struct cron_struct *) malloc(sizeof(struct cron_struct));
+    (struct cron_struct *) xmalloc(sizeof(struct cron_struct));
   (*cron).minute = strdup(match[1]);
   (*cron).hour = strdup(match[2]);
   (*cron).day_of_month = strdup(match[3]);
@@ -82,7 +82,7 @@ int dgetcrons(struct cron_struct **crons, char *dirname) {
         int _cron_c = fgetcrons(&_crons, stream);
         (*crons) =
           (struct cron_struct *)
-          realloc(
+          xrealloc(
             (*crons),
             sizeof(struct cron_struct) * (cron_c + _cron_c));
         memcpy((*crons) + cron_c, _crons, sizeof(struct cron_struct) * _cron_c);
@@ -109,7 +109,7 @@ int fgetcrons(struct cron_struct **crons, FILE *stream) {
     }
     (*crons) =
       (struct cron_struct *)
-      realloc(
+      xrealloc(
         (*crons),
         sizeof(struct cron_struct) * (cron_c + 1));
     (*crons)[cron_c] = (*cron);

@@ -4,7 +4,7 @@ CC = gcc
 # compiler flags
 CFLAGS = -g -Wall
 
-SOURCES = uron.c cron.c
+SOURCES = uron.c cron.c util.c
 
 TARGET = uron
 

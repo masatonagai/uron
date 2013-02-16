@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include "util.h"
 #include "cron.h"
 
 static char *crontox(const struct cron_struct cron) {
-  char *cronx = (char *) malloc(LINE_MAX);
+  char *cronx = (char *) xmalloc(LINE_MAX);
   sprintf(
       cronx,
       "%s %s %s %s %s %s %s",
@@ -32,25 +33,6 @@ static int test_getcron() {
     return 0;
   }
   return 1;
-}
-
-static int test_dgetcrons() {
-  struct cron_struct *actual_crons;
-  int cron_c = dgetcrons(&actual_crons, "./dummy_cron.d/");
-  int i;
-  for (i = 0; i < cron_c; i++) {
-    printf(
-        "%s %s %s %s %s %s %s\n",
-        actual_crons[i].minute,
-        actual_crons[i].hour,
-        actual_crons[i].day_of_month,
-        actual_crons[i].month,
-        actual_crons[i].day_of_week,
-        actual_crons[i].username,
-        actual_crons[i].command);
-  }
-  free(actual_crons);
-  return EXIT_SUCCESS;
 }
 
 static int test_fgetcrons() {

@@ -6,6 +6,7 @@
 #include <getopt.h>
 #include "cron.h"
 #include "path.h"
+#include "util.h"
 
 #define H_NO "NO"
 #define H_MIN "MIN"
@@ -26,7 +27,7 @@ static void list_crons() {
   int cron_c = dgetcrons(&crons, CRON_DIR);
   int i;
   struct uron_struct *urons =
-    (struct uron_struct *) malloc(sizeof(struct uron_struct) * cron_c);
+    (struct uron_struct *) xmalloc(sizeof(struct uron_struct) * cron_c);
   for (i = 0; i < cron_c; i++) {
     struct uron_struct uron = { i, crons[i] };
     urons[i] = uron;
