@@ -1,6 +1,8 @@
 #ifndef CRON_H
 #define CRON_H
 
+#include <stdio.h>
+
 struct cron_struct {
   char *minute;
   char *hour;
@@ -14,6 +16,5 @@ struct cron_struct {
 int dgetcrons(struct cron_struct **, char *);
 int fgetcrons(struct cron_struct **, FILE *);
 struct cron_struct * getcron(const char *);
-void getcrons(struct cron_struct **, char **, int);
 
 #endif /* CRON_H */

@@ -63,16 +63,16 @@ struct cron_struct * getcron(const char *s) {
 
 int dgetcrons(struct cron_struct **crons, char *dirname) {
   (*crons) = NULL;
-  struct dirent *entry;
-  DIR *dir = opendir(dirname);
   int cron_c = 0;
+
+  DIR *dir = opendir(dirname);
+  struct dirent *entry;
+  char path[PATH_MAX];
   while ((entry = readdir(dir)) != NULL) {
     if ((*entry).d_type == DT_REG) {
       const char *filename = (*entry).d_name;
       if (*filename != '.') {
-        char path[PATH_MAX];
-        strcpy(path, dirname);
-        strcpy(path + strlen(dirname), filename);
+        snprintf(path, PATH_MAX, "%s/%s", dirname, filename);
         FILE *stream = fopen(path, "r");
         if (!stream) {
           fprintf(stderr, "failed: open %s\n", path);
@@ -97,13 +97,13 @@ int dgetcrons(struct cron_struct **crons, char *dirname) {
 
 int fgetcrons(struct cron_struct **crons, FILE *stream) {
   (*crons) = NULL;
-  char buff[LINE_MAX];
+  char line[LINE_MAX];
   int cron_c = 0;
   for (;;) {
-    if (fgets(buff, LINE_MAX, stream) == NULL) {
+    if (fgets(line, LINE_MAX, stream) == NULL) {
       break;
     }
-    struct cron_struct *cron = getcron(buff);
+    struct cron_struct *cron = getcron(line);
     if (cron == NULL) {
       continue;
     }

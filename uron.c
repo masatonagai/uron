@@ -5,6 +5,7 @@
 #include <sys/param.h>
 #include <getopt.h>
 #include "cron.h"
+#include "path.h"
 
 #define H_NO "NO"
 #define H_MIN "MIN"
@@ -15,10 +16,21 @@
 #define H_USR "USR"
 #define H_CMD "CMD"
 
+struct uron_struct {
+  unsigned int n;
+  struct cron_struct cron;
+};
+
 static void list_crons() {
   struct cron_struct *crons;
-  int cron_c = dgetcrons(&crons, "/etc/cron.d/");
+  int cron_c = dgetcrons(&crons, CRON_DIR);
   int i;
+  struct uron_struct *urons =
+    (struct uron_struct *) malloc(sizeof(struct uron_struct) * cron_c);
+  for (i = 0; i < cron_c; i++) {
+    struct uron_struct uron = { i, crons[i] };
+    urons[i] = uron;
+  }
 
   int h_no_len = MIN(2, strlen(H_NO));
   int h_min_len = strlen(H_MIN);
@@ -29,13 +41,14 @@ static void list_crons() {
   int h_usr_len = strlen(H_USR);
   int h_cmd_len = strlen(H_CMD);
   for (i = 0; i < cron_c; i++) {
-    h_min_len = MAX(h_min_len, strlen(crons[i].minute));
-    h_hr_len = MAX(h_hr_len, strlen(crons[i].hour));
-    h_dom_len = MAX(h_dom_len, strlen(crons[i].day_of_month));
-    h_mon_len = MAX(h_mon_len, strlen(crons[i].month));
-    h_dow_len = MAX(h_dow_len, strlen(crons[i].day_of_week));
-    h_usr_len = MAX(h_usr_len, strlen(crons[i].username));
-    h_cmd_len = MAX(h_cmd_len, strlen(crons[i].command));
+    struct cron_struct cron = urons[i].cron;
+    h_min_len = MAX(h_min_len, strlen(cron.minute));
+    h_hr_len = MAX(h_hr_len, strlen(cron.hour));
+    h_dom_len = MAX(h_dom_len, strlen(cron.day_of_month));
+    h_mon_len = MAX(h_mon_len, strlen(cron.month));
+    h_dow_len = MAX(h_dow_len, strlen(cron.day_of_week));
+    h_usr_len = MAX(h_usr_len, strlen(cron.username));
+    h_cmd_len = MAX(h_cmd_len, strlen(cron.command));
   }
   char buff[LINE_MAX];
   sprintf(buff,
@@ -48,16 +61,18 @@ static void list_crons() {
       h_no_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   for (i = 0; i < cron_c; i++) {
+    struct uron_struct uron = urons[i];
+    struct cron_struct cron = uron.cron;
     printf(
         buff,
-        i,
-        crons[i].minute,
-        crons[i].hour,
-        crons[i].day_of_month,
-        crons[i].month,
-        crons[i].day_of_week,
-        crons[i].username,
-        crons[i].command);
+        uron.n,
+        cron.minute,
+        cron.hour,
+        cron.day_of_month,
+        cron.month,
+        cron.day_of_week,
+        cron.username,
+        cron.command);
   }
   exit(EXIT_SUCCESS);
 }
