@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <string.h>
 #include <sys/param.h>
+#include <getopt.h>
 #include "cron.h"
 
 #define H_NO "NO"
@@ -14,7 +15,7 @@
 #define H_USR "USR"
 #define H_CMD "CMD"
 
-int main(int argc, char **argv) {
+static void list_crons() {
   struct cron_struct *crons;
   int cron_c = dgetcrons(&crons, "/etc/cron.d/");
   int i;
@@ -58,5 +59,38 @@ int main(int argc, char **argv) {
         crons[i].username,
         crons[i].command);
   }
+  exit(EXIT_SUCCESS);
+}
+
+static void usage() {
+  fprintf(stderr, "usage: uron\n");
+  fprintf(stderr, "       -l, --list  list jobs up\n");
+  fprintf(stderr, "       -h, --help  show this help\n");
+  exit(EXIT_FAILURE);
+}
+
+int main(int argc, char **argv) {
+  struct option long_opts[] = {
+    { "help", no_argument, 0, 'h' },
+    { "list", no_argument, 0, 'l' }
+  };
+
+  for (;;) {
+    int index;
+    int c = getopt_long(argc, argv, "hl", long_opts, &index);
+    if (c == -1) {
+      break;
+    }
+    switch (c) {
+      case 'l':
+        list_crons();
+        break;
+      case 'h':
+      default:
+        usage();
+        break;
+    }
+  }
+  usage();
   return EXIT_SUCCESS;
 }
