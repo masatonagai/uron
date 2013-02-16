@@ -1,5 +1,5 @@
 # the compiler
-CC = gcc
+CC = gcc -std=gnu99
 
 # compiler flags
 CFLAGS = -g -Wall
