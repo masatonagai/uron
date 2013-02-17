@@ -66,12 +66,12 @@ static void list_crons() {
     h_cmd_len = MAX(h_cmd_len, strlen((*cron).command));
   }
   char buff[LINE_MAX];
-  sprintf(buff,
+  snprintf(buff, sizeof(buff),
       "\e[30;47;2m%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\e[0m\n",
       h_no_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   printf(buff, H_NO, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
-  sprintf(buff,
+  snprintf(buff, sizeof(buff),
       "%%-%dd %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\n",
       h_no_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);

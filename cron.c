@@ -48,7 +48,7 @@ struct cron_struct * getcron(const char *s) {
   regex_t regex;
   regmatch_t pmatch[N_MATCH];
   char pattern[256];
-  sprintf(pattern,
+  snprintf(pattern, sizeof(pattern),
       "^%s*(%s)%s+(%s)%s+(%s)%s+(%s)%s+(%s)%s+(%s)%s+(%s)%s*$",
         SP,MIN,SP,HR, SP,DOM,SP,MON,SP,DOW,SP,USR,SP,CMD,SP
       );
