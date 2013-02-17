@@ -2,7 +2,7 @@
 CC = gcc -std=gnu99
 
 # compiler flags
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -lcurses
 
 SOURCES = uron.c cron.c util.c
 
