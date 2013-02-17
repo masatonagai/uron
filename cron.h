@@ -1,5 +1,5 @@
-#ifndef CRON_H
-#define CRON_H
+#ifndef URON_CRON_H
+#define URON_CRON_H
 
 #include <stdio.h>
 
@@ -18,4 +18,4 @@ int fgetcrons(struct cron_struct ***, FILE *);
 struct cron_struct * getcron(const char *);
 void freecron(struct cron_struct *);
 
-#endif /* CRON_H */
+#endif /* URON_CRON_H */

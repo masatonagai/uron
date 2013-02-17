@@ -7,6 +7,7 @@
 #include "cron.h"
 #include "path.h"
 #include "util.h"
+#include "term.h"
 
 #define H_NO "NO"
 #define H_MIN "MIN"
