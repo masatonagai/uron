@@ -17,6 +17,10 @@
 #define H_USR "USR"
 #define H_CMD "CMD"
 
+enum command {
+  help_command, list_command
+};
+
 struct uron_struct {
   unsigned int n;
   struct cron_struct *cron;
@@ -34,9 +38,9 @@ struct uron_struct * makeuron(unsigned int n, struct cron_struct *cron) {
   return uron;
 }
 
-static void list_crons() {
+static void list(char *cron_dir) {
   struct cron_struct **crons;
-  int cron_c = dgetcrons(&crons, CRON_DIR);
+  int cron_c = dgetcrons(&crons, cron_dir);
   int i;
   struct uron_struct **urons =
     (struct uron_struct **) xmalloc(sizeof(struct uron_struct *) * cron_c);
@@ -94,35 +98,52 @@ static void list_crons() {
   exit(EXIT_SUCCESS);
 }
 
-static void usage() {
-  fprintf(stderr, "usage: uron\n");
-  fprintf(stderr, "       -l, --list  list jobs up\n");
-  fprintf(stderr, "       -h, --help  show this help\n");
+static void help() {
+  fprintf(stderr, "usage: uron [OPTION...]\n");
+  fprintf(stderr, "  commands:\n");
+  fprintf(stderr, "    -h, --help  show this help\n");
+  fprintf(stderr, "    -l, --list  list jobs up\n");
+  fprintf(stderr, "  command modifiers:\n");
+  fprintf(stderr, "    -d, --dir   specify cron dir (default is \"%s\")\n", CRON_DIR);
   exit(EXIT_FAILURE);
 }
 
 int main(int argc, char **argv) {
   struct option long_opts[] = {
     { "help", no_argument, 0, 'h' },
-    { "list", no_argument, 0, 'l' }
+    { "list", no_argument, 0, 'l' },
+    { "dir",  required_argument, 0, 'd' }
   };
 
+  enum command cmd = help_command;
+  char *cron_dir = CRON_DIR;
   for (;;) {
     int index;
-    int c = getopt_long(argc, argv, "hl", long_opts, &index);
+    int c = getopt_long(argc, argv, "hld:0", long_opts, &index);
     if (c == -1) {
       break;
     }
     switch (c) {
       case 'l':
-        list_crons();
+        cmd = list_command;
         break;
       case 'h':
-      default:
-        usage();
+        cmd = help_command;
+        break;
+      case 'd':
+        cron_dir = optarg;
         break;
     }
   }
-  usage();
+
+  switch (cmd) {
+    case help_command:
+      help();
+      break;
+    case list_command:
+      list(cron_dir);
+      break;
+  }
+
   return EXIT_SUCCESS;
 }
