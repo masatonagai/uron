@@ -16,5 +16,6 @@ uron
 
 # Executables
 *.exe
-*.out
+*.out*
+*.tmp*
 *.app
