@@ -30,18 +30,40 @@ void * xrealloc(void *p, size_t size) {
 }
 
 struct term_struct terminfo() {
-  int columns = 80;
-  int lines = 20;
-  char *term_name = getenv("TERM");
-  char *buff = NULL; /* tgetent(3) does not need buff on Linux */
-  if (tgetent(buff, term_name)) {
-    columns = tgetnum("co");
-    lines = tgetnum("li");
-  } else {
-    fprintf(stderr, "failed to get terminal info");
+  /* don't use "columns" or "lines" that are macro defined in term.h */
+  int cols = 0;
+  int rows = 0;
+  char *s;
+  s = getenv("COLUMNS");
+  if (s && *s) {
+    cols = atoi(s);
   }
-  struct term_struct term = {
-    columns, lines
+  s = getenv("LINES");
+  if (s && *s) {
+    rows = atoi(s);
+  }
+  if (!(cols && rows)) {
+    char *term_name = getenv("TERM");
+    if (term_name && *term_name) {
+      char buff[2048];
+      if (tgetent(buff, term_name)) {
+        if (!cols) {
+          cols = tgetnum("co");
+        }
+        if (!rows) {
+          rows = tgetnum("li");
+        }
+      }
+    }
+  }
+  if (!(cols && rows)) {
+    fprintf(stderr, "failed to get terminal info");
+    cols = 80;
+    rows = 25;
+  }
+  struct term_struct t = {
+    cols, rows
   };
-  return term;
+  printf ("screen: %d * %d\n", cols, rows);
+  return t;
 }
