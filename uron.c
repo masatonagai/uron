@@ -244,7 +244,7 @@ static void list(char *cron_dir) {
   char *buff = xmalloc(buff_size);
   int chars;
   chars = snprintf(buff, buff_size,
-      "\e[30;47;2m%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\e[0m\n",
+      "\e[7m%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\e[0m\n",
       h_id_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   if (buff[chars - 1] != '\n') {
@@ -252,7 +252,7 @@ static void list(char *cron_dir) {
   }
   printf(buff, H_ID, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
   chars = snprintf(buff, buff_size,
-      "%%-%dd %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\n",
+      "\e[0m%%-%dd\e[0m %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\n",
       h_id_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   if (buff[chars - 1] != '\n') {
