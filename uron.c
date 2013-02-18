@@ -164,6 +164,7 @@ int dgeturons(struct uron_struct ***urons) {
     uron_c += _uron_c;
     fclose(stream);
   }
+  free(paths);
   return uron_c;
 }
 
@@ -206,10 +207,15 @@ static void list(char *cron_dir) {
     if (alive) {
       aurons[auron_c] = uron;
       auron_c++;
+    } else {
+      freeuron(uron);
     }
   }
-  free(urons);
+  for (i = 0; i < cron_c; i++) {
+    freecron(crons[i]);
+  }
   free(crons);
+  free(urons);
   urons = aurons;
 
   int h_no_len = MIN(2, strlen(H_NO));
