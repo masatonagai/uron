@@ -218,7 +218,7 @@ static void list(char *cron_dir) {
   free(urons);
   urons = aurons;
 
-  int h_no_len = MIN(2, strlen(H_NO));
+  int h_no_len = strlen(H_NO);
   int h_min_len = strlen(H_MIN);
   int h_hr_len = strlen(H_HR);
   int h_dom_len = strlen(H_DOM);
@@ -226,9 +226,12 @@ static void list(char *cron_dir) {
   int h_dow_len = strlen(H_DOW);
   int h_usr_len = strlen(H_USR);
   int h_cmd_len = strlen(H_CMD);
+  char tmps[12];
   for (i = 0; i < cron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;
+    sprintf(tmps, "%u", (*uron).n);
+    h_no_len = MAX(h_no_len, strlen(tmps));
     h_min_len = MAX(h_min_len, strlen((*cron).minute));
     h_hr_len = MAX(h_hr_len, strlen((*cron).hour));
     h_dom_len = MAX(h_dom_len, strlen((*cron).day_of_month));
