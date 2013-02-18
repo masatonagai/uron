@@ -17,5 +17,7 @@ int dgetcrons(struct cron_struct ***, char *);
 int fgetcrons(struct cron_struct ***, FILE *);
 struct cron_struct * getcron(const char *);
 void freecron(struct cron_struct *);
+int eqcron(struct cron_struct *, struct cron_struct *);
+int crontox(char **, struct cron_struct *);
 
 #endif /* URON_CRON_H */

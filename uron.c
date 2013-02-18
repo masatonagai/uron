@@ -3,11 +3,14 @@
 #include <limits.h>
 #include <string.h>
 #include <sys/param.h>
+#include <sys/stat.h>
 #include <getopt.h>
+#include <dirent.h>
 #include "cron.h"
 #include "path.h"
 #include "util.h"
 #include "term.h"
+#include "io.h"
 
 #define H_NO "NO"
 #define H_MIN "MIN"
@@ -17,6 +20,18 @@
 #define H_DOW "DOW"
 #define H_USR "USR"
 #define H_CMD "CMD"
+
+
+enum command;
+struct uron_struct;
+
+void freeuron(struct uron_struct *);
+void saveuron(struct uron_struct *);
+struct uron_struct * makeuron(unsigned int, struct cron_struct *);
+struct uron_struct * geturon(char *);
+int fgeturons(struct uron_struct ***, FILE *);
+int dgeturons(struct uron_struct ***);
+
 
 enum command {
   help_command, list_command
@@ -32,6 +47,56 @@ void freeuron(struct uron_struct *uron) {
   free(uron);
 }
 
+void saveuron(struct uron_struct *uron) {
+  DIR *uron_dir = opendir(URON_DIR);
+  if (uron_dir == NULL) {
+    fprintf(stderr, "failed to open \"%s\"\n", URON_DIR);
+    exit(EXIT_FAILURE);
+  }
+  char path[PATH_MAX];
+  snprintf(path, PATH_MAX, "%s/%s", URON_DIR, "1");
+  FILE *stream = fopen(path, "a+");
+  if (stream == NULL) {
+    fprintf(stderr, "failed to open \"%s\"\n", path);
+    exit(EXIT_FAILURE);
+  }
+  flockfile(stream);
+
+  fseek(stream, 0, SEEK_END);
+  char line[1024];
+  int i;
+  for (i = 0; fseek(stream, -2, SEEK_CUR) == 0; i++) {
+    char ch = fgetc(stream);
+    if (ch == '\n') {
+      break;
+    }
+    line[i] = ch;
+  }
+  int n = 0;
+  if (i > 0) {
+    line[i] = '\0';
+    char *luronx = xmalloc(i);
+    int j, k;
+    for (j = 0, k= (i - 1); j < i; j++, k--) {
+      luronx[j] = line[k];
+    }
+    struct uron_struct *luron = geturon(luronx);
+    if (luron != NULL) {
+      n = (*luron).n + 1;
+    }
+    fseek(stream, 0, SEEK_END);
+  }
+  (*uron).n = n;
+
+  char *cronx;
+  crontox(&cronx, (*uron).cron);
+  if (fprintf(stream, "%d %s\n", (*uron).n, cronx) < 0) {
+    fprintf(stderr, "failed to write to \"%s\"\n", path);
+  }
+  funlockfile(stream);
+  fclose(stream);
+}
+
 struct uron_struct * makeuron(unsigned int n, struct cron_struct *cron) {
   struct uron_struct *uron = (struct uron_struct *) xmalloc(sizeof(struct uron_struct));
   (*uron).n = n;
@@ -39,17 +104,113 @@ struct uron_struct * makeuron(unsigned int n, struct cron_struct *cron) {
   return uron;
 }
 
+struct uron_struct * geturon(char *s) {
+  int n;
+  char cron_x[LINE_MAX]; // todo
+  sscanf(s, "%d %[^\n]", &n, cron_x);
+  struct cron_struct *cron = getcron(cron_x);
+  struct uron_struct *uron = malloc(sizeof(struct uron_struct));
+  (*uron).n = n;
+  (*uron).cron = cron;
+  return uron;
+}
+
+int fgeturons(struct uron_struct ***urons, FILE *stream) {
+  (*urons) = NULL;
+  char line[LINE_MAX];
+  int uron_c = 0;
+  for (;;) {
+    if (fgets(line, LINE_MAX, stream) == NULL) {
+      break;
+    }
+    struct uron_struct *uron = geturon(line);
+    if (uron == NULL) {
+      continue;
+    }
+    (*urons) =
+      (struct uron_struct **)
+      xrealloc(
+        (*urons),
+        sizeof(struct uron_struct *) * (uron_c + 1));
+    (*urons)[uron_c] = uron;
+    uron_c++;
+  }
+  return uron_c;
+}
+
+int dgeturons(struct uron_struct ***urons) {
+  (*urons) = NULL;
+  char **paths;
+  int file_c = getfpaths(&paths, URON_DIR);
+
+  int uron_c = 0;
+  int i;
+  for (i = 0; i < file_c; i++) {
+    char *path = paths[i];
+    FILE *stream = fopen(path, "r");
+    if (!stream) {
+      fprintf(stderr, "failed: open %s\n", path);
+      continue;
+    }
+    struct uron_struct **_urons;
+    int _uron_c = fgeturons(&_urons, stream);
+    (*urons) =
+      (struct uron_struct **)
+      xrealloc(
+        (*urons),
+        sizeof(struct uron_struct *) * (uron_c + _uron_c));
+    memcpy((*urons) + uron_c, _urons, sizeof(struct uron_struct *) * _uron_c);
+    free(_urons);
+    uron_c += _uron_c;
+    fclose(stream);
+  }
+  return uron_c;
+}
+
 static void list(char *cron_dir) {
   struct cron_struct **crons;
   int cron_c = dgetcrons(&crons, cron_dir);
-  int i;
-  struct uron_struct **urons =
-    (struct uron_struct **) xmalloc(sizeof(struct uron_struct *) * cron_c);
+  struct uron_struct **urons;
+  int uron_c = dgeturons(&urons);
+  int i, j;
   for (i = 0; i < cron_c; i++) {
-    struct uron_struct *uron = makeuron(i, crons[i]);
-    urons[i] = uron;
+    struct cron_struct *cron = crons[i];
+    int known = 0;
+    for (j = 0; j < uron_c; j++) {
+      struct uron_struct *uron = urons[j];
+      if (eqcron(cron, (*uron).cron)) {
+        known = 1;
+        break;
+      }
+    }
+    if (!known) {
+      struct uron_struct *uron = makeuron(0, cron);
+      saveuron(uron);
+      uron_c++;
+      urons = xrealloc(urons, sizeof(struct uron_struct *) * uron_c);
+      urons[uron_c - 1] = uron;
+    }
   }
+  struct uron_struct **aurons = xmalloc(sizeof(struct uron_struct *) * uron_c);
+  int auron_c = 0;
+  for (i = 0; i < uron_c; i++) {
+    struct uron_struct *uron = urons[i];
+    int alive = 0;
+    for (j = 0; j < cron_c; j++) {
+      struct cron_struct *cron = crons[j];
+      if (eqcron(cron, (*uron).cron)) {
+        alive = 1;
+        break;
+      }
+    }
+    if (alive) {
+      aurons[auron_c] = uron;
+      auron_c++;
+    }
+  }
+  free(urons);
   free(crons);
+  urons = aurons;
 
   int h_no_len = MIN(2, strlen(H_NO));
   int h_min_len = strlen(H_MIN);

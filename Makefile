@@ -4,7 +4,7 @@ CC = gcc -std=gnu99
 # compiler flags
 CFLAGS = -g -Wall -lcurses
 
-SOURCES = uron.c cron.c util.c term.c
+SOURCES = uron.c cron.c util.c term.c io.c
 
 TARGET = uron
 

@@ -19,6 +19,37 @@
 #define CMD "[^\r\n]+"
 #define SP "[[:space:]]"
 
+int crontox(char **cronx, struct cron_struct *cron) {
+  (*cronx) = (char *) xmalloc(LINE_MAX);
+  return snprintf(
+      (*cronx),
+      LINE_MAX,
+      "%s %s %s %s %s %s %s",
+      (*cron).minute,
+      (*cron).hour,
+      (*cron).day_of_month,
+      (*cron).month,
+      (*cron).day_of_week,
+      (*cron).username,
+      (*cron).command);
+}
+
+int eqcron(struct cron_struct *a, struct cron_struct *b) {
+  if (a == b) {
+    return 1;
+  }
+  if (strcmp((*a).minute, (*b).minute) == 0 &&
+      strcmp((*a).hour, (*b).hour) == 0 &&
+      strcmp((*a).day_of_month, (*b).day_of_month) == 0 &&
+      strcmp((*a).month, (*b).month) == 0 &&
+      strcmp((*a).day_of_week, (*b).day_of_week) == 0 &&
+      strcmp((*a).username, (*b).username) == 0 &&
+      strcmp((*a).command, (*b).command) == 0) {
+    return 1;
+  }
+  return 0;
+}
+
 void freecron(struct cron_struct *cron) {
   free((*cron).minute);
   free((*cron).hour);
