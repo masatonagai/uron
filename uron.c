@@ -12,7 +12,7 @@
 #include "term.h"
 #include "io.h"
 
-#define H_NO "NO"
+#define H_ID "ID"
 #define H_MIN "MIN"
 #define H_HR "HR"
 #define H_DOM "DOM"
@@ -38,7 +38,7 @@ enum command {
 };
 
 struct uron_struct {
-  unsigned int n;
+  unsigned int id;
   struct cron_struct *cron;
 };
 
@@ -72,7 +72,6 @@ void saveuron(struct uron_struct *uron) {
     }
     line[i] = ch;
   }
-  int n = 0;
   if (i > 0) {
     line[i] = '\0';
     char *luronx = xmalloc(i);
@@ -82,35 +81,34 @@ void saveuron(struct uron_struct *uron) {
     }
     struct uron_struct *luron = geturon(luronx);
     if (luron != NULL) {
-      n = (*luron).n + 1;
+      (*uron).id = (*luron).id + 1;
     }
     fseek(stream, 0, SEEK_END);
   }
-  (*uron).n = n;
 
   char *cronx;
   crontox(&cronx, (*uron).cron);
-  if (fprintf(stream, "%d %s\n", (*uron).n, cronx) < 0) {
+  if (fprintf(stream, "%d %s\n", (*uron).id, cronx) < 0) {
     fprintf(stderr, "failed to write to \"%s\"\n", path);
   }
   funlockfile(stream);
   fclose(stream);
 }
 
-struct uron_struct * makeuron(unsigned int n, struct cron_struct *cron) {
+struct uron_struct * makeuron(unsigned int id, struct cron_struct *cron) {
   struct uron_struct *uron = (struct uron_struct *) xmalloc(sizeof(struct uron_struct));
-  (*uron).n = n;
+  (*uron).id = id;
   (*uron).cron = cron;
   return uron;
 }
 
 struct uron_struct * geturon(char *s) {
-  int n;
+  unsigned int id;
   char cron_x[LINE_MAX]; // todo
-  sscanf(s, "%d %[^\n]", &n, cron_x);
+  sscanf(s, "%d %[^\n]", &id, cron_x);
   struct cron_struct *cron = getcron(cron_x);
   struct uron_struct *uron = malloc(sizeof(struct uron_struct));
-  (*uron).n = n;
+  (*uron).id = id;
   (*uron).cron = cron;
   return uron;
 }
@@ -218,7 +216,7 @@ static void list(char *cron_dir) {
   free(urons);
   urons = aurons;
 
-  int h_no_len = strlen(H_NO);
+  int h_id_len = strlen(H_ID);
   int h_min_len = strlen(H_MIN);
   int h_hr_len = strlen(H_HR);
   int h_dom_len = strlen(H_DOM);
@@ -230,8 +228,8 @@ static void list(char *cron_dir) {
   for (i = 0; i < cron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;
-    sprintf(tmps, "%u", (*uron).n);
-    h_no_len = MAX(h_no_len, strlen(tmps));
+    sprintf(tmps, "%u", (*uron).id);
+    h_id_len = MAX(h_id_len, strlen(tmps));
     h_min_len = MAX(h_min_len, strlen((*cron).minute));
     h_hr_len = MAX(h_hr_len, strlen((*cron).hour));
     h_dom_len = MAX(h_dom_len, strlen((*cron).day_of_month));
@@ -247,15 +245,15 @@ static void list(char *cron_dir) {
   int chars;
   chars = snprintf(buff, buff_size,
       "\e[30;47;2m%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\e[0m\n",
-      h_no_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
+      h_id_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   if (buff[chars - 1] != '\n') {
     buff[chars - 1] = '\n';
   }
-  printf(buff, H_NO, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
+  printf(buff, H_ID, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
   chars = snprintf(buff, buff_size,
       "%%-%dd %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\n",
-      h_no_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
+      h_id_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   if (buff[chars - 1] != '\n') {
     buff[chars - 1] = '\n';
@@ -265,7 +263,7 @@ static void list(char *cron_dir) {
     struct cron_struct *cron = (*uron).cron;
     printf(
         buff,
-        (*uron).n,
+        (*uron).id,
         (*cron).minute,
         (*cron).hour,
         (*cron).day_of_month,
