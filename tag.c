@@ -73,4 +73,34 @@ void addtag(const char *tag, const unsigned int *ids, int n) {
 }
 
 void rmtag(const char *tag, const unsigned int *ids, int n) {
+  struct uron_struct **urons, *uron;
+  int uron_c, i, j, b;
+  uron_c = dgeturons(&urons);
+  for (i = 0; i < uron_c; i++) {
+    uron = urons[i];
+    b = 0;
+    for (j = 0; j < n; j++) {
+      if ((*uron).id == ids[j]) {
+        b = 1;
+        break;
+      }
+    }
+    if (!b) {
+      continue;
+    }
+    int k, l;
+    for (k = 0; k < (*uron).tag_n; k++) {
+      if (strcmp((*uron).tags[k], tag) == 0) {
+        free((*uron).tags[k]);
+        for (l = k + 1; l < (*uron).tag_n; l++) {
+          (*uron).tags[l - 1] = strdup((*uron).tags[l]);
+        }
+        (*uron).tag_n--;
+        saveuron(uron);
+        break;
+      }
+    }
+    freeuron(uron);
+  }
+  free(urons);
 }
