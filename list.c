@@ -21,7 +21,8 @@
 #define H_USR "USR"
 #define H_CMD "CMD"
 
-void list(char *cron_dir) {
+
+void list(const char *tag, char *cron_dir) {
   struct cron_struct **crons;
   int cron_c = dgetcrons(&crons, cron_dir);
   struct uron_struct **urons;
@@ -57,7 +58,7 @@ void list(char *cron_dir) {
         break;
       }
     }
-    if (alive) {
+    if (alive && (!tag || tagged(uron, tag))) {
       aurons[auron_c] = uron;
       auron_c++;
     } else {
@@ -70,7 +71,14 @@ void list(char *cron_dir) {
   }
   free(crons);
   free(urons);
+  uron_c = auron_c;
   urons = aurons;
+
+  printf("TOTAL: %d\n", uron_c);
+
+  if (!uron_c) {
+    exit(EXIT_SUCCESS);
+  }
 
   int h_id_len = strlen(H_ID);
   int h_tag_len = strlen(H_TAG);
@@ -82,7 +90,7 @@ void list(char *cron_dir) {
   int h_usr_len = strlen(H_USR);
   int h_cmd_len = strlen(H_CMD);
   char id[11 + 1];
-  for (i = 0; i < cron_c; i++) {
+  for (i = 0; i < uron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;
     char *tagx;
@@ -119,7 +127,7 @@ void list(char *cron_dir) {
   if (buff[chars - 1] != '\n') {
     buff[chars - 1] = '\n';
   }
-  for (i = 0; i < cron_c; i++) {
+  for (i = 0; i < uron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;
     char *tagx;

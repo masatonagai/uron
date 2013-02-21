@@ -271,7 +271,7 @@ int main(int argc, char **argv) {
       rmtag(tag, uron_ids, n);
       break;
     case list_command:
-      list(cron_dir);
+      list(tag, cron_dir);
       break;
   }
 

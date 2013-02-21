@@ -5,6 +5,16 @@
 #include "uron.h"
 #include "util.h"
 
+int tagged(const struct uron_struct *uron, const char *tag) {
+  int i, n;
+  for (i = 0, n = (*uron).tag_n; i < n; i++) {
+    if (strcmp((*uron).tags[i], tag) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 int tagstox(char **tagx, const char **tags, int tag_n) {
   (*tagx) = (char *) xmalloc(URON_TAG_MAX);
   size_t max_n = URON_TAG_MAX;
