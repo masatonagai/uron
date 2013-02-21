@@ -194,15 +194,18 @@ int dgeturons(struct uron_struct ***urons) {
 }
 
 static void help() {
-  fprintf(stderr, "usage: uron [OPTION...] [ID...]\n");
-  fprintf(stderr, "  commands:\n");
-  fprintf(stderr, "    -h, --help     show this help\n");
-  fprintf(stderr, "    -l, --list     list jobs up\n");
-  fprintf(stderr, "    -a, --add      add tag to job\n");
-  fprintf(stderr, "    -r, --remove   remove tag from job\n");
-  fprintf(stderr, "  command modifiers:\n");
-  fprintf(stderr, "    -t, --tag      tag\n");
-  fprintf(stderr, "    -d, --dir      cron dir (default is \"%s\")\n", CRON_DIR);
+  fprintf(stderr,
+    "usage: uron [option(s)] [id(s)]\n"
+    "  commands:\n"
+    "    -h, --help     show this help\n"
+    "    -l, --list     list jobs\n"
+    "    -a, --add      add tag to job\n"
+    "    -r, --remove   remove tag from job\n"
+    "  command modifiers:\n"
+    "    -t, --tag      tag\n"
+    "    -d, --dir      cron dir (default is \"%s\")\n",
+    CRON_DIR
+    );
   exit(EXIT_FAILURE);
 }
 
