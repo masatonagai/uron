@@ -9,8 +9,10 @@
 #include "cron.h"
 #include "util.h"
 #include "term.h"
+#include "tag.h"
 
 #define H_ID "ID"
+#define H_TAG "TAG"
 #define H_MIN "MIN"
 #define H_HR "HR"
 #define H_DOM "DOM"
@@ -36,7 +38,7 @@ void list(char *cron_dir) {
       }
     }
     if (!known) {
-      struct uron_struct *uron = makeuron(0, cron);
+      struct uron_struct *uron = makeuron(cron);
       saveuron(uron);
       uron_c++;
       urons = xrealloc(urons, sizeof(struct uron_struct *) * uron_c);
@@ -63,13 +65,15 @@ void list(char *cron_dir) {
     }
   }
   for (i = 0; i < cron_c; i++) {
-    freecron(crons[i]);
+    /* double free ? */
+    // freecron(crons[i]);
   }
   free(crons);
   free(urons);
   urons = aurons;
 
   int h_id_len = strlen(H_ID);
+  int h_tag_len = strlen(H_TAG);
   int h_min_len = strlen(H_MIN);
   int h_hr_len = strlen(H_HR);
   int h_dom_len = strlen(H_DOM);
@@ -77,12 +81,14 @@ void list(char *cron_dir) {
   int h_dow_len = strlen(H_DOW);
   int h_usr_len = strlen(H_USR);
   int h_cmd_len = strlen(H_CMD);
-  char tmps[12];
+  char id[11 + 1];
   for (i = 0; i < cron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;
-    sprintf(tmps, "%u", (*uron).id);
-    h_id_len = MAX(h_id_len, strlen(tmps));
+    char *tagx;
+    h_id_len = MAX(h_id_len, sprintf(id, "%u", (*uron).id));
+    h_tag_len = MAX(h_tag_len, tagstox(&tagx, (const char **) (*uron).tags, (*uron).tag_n));
+    free(tagx);
     h_min_len = MAX(h_min_len, strlen((*cron).minute));
     h_hr_len = MAX(h_hr_len, strlen((*cron).hour));
     h_dom_len = MAX(h_dom_len, strlen((*cron).day_of_month));
@@ -97,16 +103,18 @@ void list(char *cron_dir) {
   char *buff = xmalloc(buff_size);
   int chars;
   chars = snprintf(buff, buff_size,
-      "\e[7m%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\e[0m\n",
-      h_id_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
+      "\e[7m%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\e[0m\n",
+      h_id_len, h_tag_len,
+      h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   if (buff[chars - 1] != '\n') {
     buff[chars - 1] = '\n';
   }
-  printf(buff, H_ID, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
+  printf(buff, H_ID, H_TAG, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
   chars = snprintf(buff, buff_size,
-      "\e[0m%%-%dd\e[0m %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\n",
-      h_id_len, h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
+      "%%-%dd %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\n",
+      h_id_len, h_tag_len,
+      h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len);
   if (buff[chars - 1] != '\n') {
     buff[chars - 1] = '\n';
@@ -114,9 +122,12 @@ void list(char *cron_dir) {
   for (i = 0; i < cron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;
+    char *tagx;
+    tagstox(&tagx, (const char **) (*uron).tags, (*uron).tag_n);
     printf(
         buff,
         (*uron).id,
+        tagx,
         (*cron).minute,
         (*cron).hour,
         (*cron).day_of_month,

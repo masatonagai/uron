@@ -8,15 +8,24 @@
 #include <sys/stat.h>
 #include <getopt.h>
 #include <dirent.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <fcntl.h>
 #include "cron.h"
 #include "path.h"
 #include "util.h"
 #include "term.h"
 #include "io.h"
 #include "list.h"
+#include "tag.h"
+
+#define URON_LINE_MAX 512 /* includes newline character */
+#define URON_LINE_PADCHAR '\r'
+#define URON_ID_MIN 1
 
 enum command {
-  help_command, list_command
+  help_command, list_command, tag_command, untag_command
+
 };
 
 void freeuron(struct uron_struct *uron) {
@@ -24,78 +33,119 @@ void freeuron(struct uron_struct *uron) {
   free(uron);
 }
 
+static struct uron_struct * getlasturon(int fd) {
+  off_t eof = lseek(fd, 0, SEEK_END);
+  if (eof > 0) {
+    off_t o = lseek(fd, (off_t) (eof - URON_LINE_MAX), SEEK_SET);
+    if (o >= 0) {
+      char *luronx = (char *) xmalloc(URON_LINE_MAX);
+      read(fd, luronx, URON_LINE_MAX);
+      struct uron_struct *luron = geturon(luronx);
+      free(luronx);
+      return luron;
+    }
+  }
+  return NULL;
+}
+
 void saveuron(struct uron_struct *uron) {
+  /*
+  printf("open %s\n", URON_DIR);
   DIR *uron_dir = opendir(URON_DIR);
   if (uron_dir == NULL) {
     fprintf(stderr, "failed to open \"%s\"\n", URON_DIR);
     exit(EXIT_FAILURE);
   }
+  */
   char path[PATH_MAX];
   snprintf(path, PATH_MAX, "%s/%s", URON_DIR, "1");
-  FILE *stream = fopen(path, "a+");
-  if (stream == NULL) {
-    fprintf(stderr, "failed to open \"%s\"\n", path);
+
+  int fd = open(path, O_RDWR | O_CREAT | O_SYNC);
+  if (fd == -1) {
+    perror("open");
     exit(EXIT_FAILURE);
   }
-  flockfile(stream);
 
-  fseek(stream, 0, SEEK_END);
-  char line[1024];
-  int i;
-  for (i = 0; fseek(stream, -2, SEEK_CUR) == 0; i++) {
-    char ch = fgetc(stream);
-    if (ch == '\n') {
-      break;
-    }
-    line[i] = ch;
-  }
-  if (i > 0) {
-    line[i] = '\0';
-    char *luronx = xmalloc(i);
-    int j, k;
-    for (j = 0, k= (i - 1); j < i; j++, k--) {
-      luronx[j] = line[k];
-    }
-    struct uron_struct *luron = geturon(luronx);
+  int add = !(*uron).id;
+  if (add) {
+    (*uron).id = URON_ID_MIN;
+    struct uron_struct *luron = getlasturon(fd);
     if (luron != NULL) {
       (*uron).id = (*luron).id + 1;
+      free(luron);
     }
-    fseek(stream, 0, SEEK_END);
+  } else {
+    lseek(fd, (off_t) (URON_LINE_MAX * ((*uron).id - URON_ID_MIN)), SEEK_SET);
   }
 
-  char *cronx;
+  char *cronx, *tagx;
   crontox(&cronx, (*uron).cron);
-  if (fprintf(stream, "%d %s\n", (*uron).id, cronx) < 0) {
-    fprintf(stderr, "failed to write to \"%s\"\n", path);
+  tagstox(&tagx, (const char **) (*uron).tags, (*uron).tag_n);
+
+  char line[URON_LINE_MAX + 1];
+  int len = snprintf(line, sizeof(line), "%d %s %s", (*uron).id, tagx, cronx);
+
+  free(cronx);
+  free(tagx);
+
+  // right pad
+  int i, n;
+  for (i = len, n = URON_LINE_MAX - 1; i < n; i++) {
+    line[i] = URON_LINE_PADCHAR;
   }
-  funlockfile(stream);
-  fclose(stream);
+  line[URON_LINE_MAX - 1] = '\n';
+  line[URON_LINE_MAX] = '\0';
+
+  ssize_t wb = write(fd, line, strlen(line));
+  if (wb == -1) {
+    perror("write");
+    exit(EXIT_FAILURE);
+  }
+  if (close(fd) == -1) {
+    perror("close");
+    exit(EXIT_FAILURE);
+  }
 }
 
-struct uron_struct * makeuron(unsigned int id, struct cron_struct *cron) {
+struct uron_struct * makeuron(struct cron_struct *cron) {
   struct uron_struct *uron = (struct uron_struct *) xmalloc(sizeof(struct uron_struct));
-  (*uron).id = id;
+  (*uron).id = 0;
+  (*uron).tag_n = 0;
+  (*uron).tags = NULL;
   (*uron).cron = cron;
   return uron;
 }
 
 struct uron_struct * geturon(char *s) {
+  const char *p = "^([0-9]+)[[:space:]]{1}([^[:space:]]*)[[:space:]]{1}([^\r\n]+)[[:space:]]*$";
+  char **match;
+  int match_c = regmatch(&match, s, p, 4);
+  if (match_c != 4) {
+    return NULL;
+  }
   unsigned int id;
-  char cron_x[LINE_MAX]; // todo
-  sscanf(s, "%d %[^\n]", &id, cron_x);
-  struct cron_struct *cron = getcron(cron_x);
+  sscanf(match[1], "%d", &id);
+  const char *tagx = match[2];
+  const char *cronx = match[3];
+
+  struct cron_struct *cron = getcron(cronx);
+  char **tags;
+  int tag_n = gettags(&tags, tagx);
+
   struct uron_struct *uron = malloc(sizeof(struct uron_struct));
   (*uron).id = id;
+  (*uron).tag_n = tag_n;
+  (*uron).tags = tags;
   (*uron).cron = cron;
   return uron;
 }
 
 int fgeturons(struct uron_struct ***urons, FILE *stream) {
   (*urons) = NULL;
-  char line[LINE_MAX];
+  char line[URON_LINE_MAX];
   int uron_c = 0;
   for (;;) {
-    if (fgets(line, LINE_MAX, stream) == NULL) {
+    if (fgets(line, URON_LINE_MAX, stream) == NULL) {
       break;
     }
     struct uron_struct *uron = geturon(line);
@@ -144,46 +194,81 @@ int dgeturons(struct uron_struct ***urons) {
 }
 
 static void help() {
-  fprintf(stderr, "usage: uron [OPTION...]\n");
+  fprintf(stderr, "usage: uron [OPTION...] [ID...]\n");
   fprintf(stderr, "  commands:\n");
-  fprintf(stderr, "    -h, --help  show this help\n");
-  fprintf(stderr, "    -l, --list  list jobs up\n");
+  fprintf(stderr, "    -h, --help     show this help\n");
+  fprintf(stderr, "    -l, --list     list jobs up\n");
+  fprintf(stderr, "    -a, --add      add tag to job\n");
+  fprintf(stderr, "    -r, --remove   remove tag from job\n");
   fprintf(stderr, "  command modifiers:\n");
-  fprintf(stderr, "    -d, --dir   specify cron dir (default is \"%s\")\n", CRON_DIR);
+  fprintf(stderr, "    -t, --tag      tag\n");
+  fprintf(stderr, "    -d, --dir      cron dir (default is \"%s\")\n", CRON_DIR);
   exit(EXIT_FAILURE);
 }
 
 int main(int argc, char **argv) {
   struct option long_opts[] = {
-    { "help", no_argument, 0, 'h' },
-    { "list", no_argument, 0, 'l' },
-    { "dir",  required_argument, 0, 'd' }
+    { "help",   no_argument,        0, 'h' },
+    { "list",   no_argument,        0, 'l' },
+    { "add",    no_argument,        0, 'a' },
+    { "remove", no_argument,        0, 'r' },
+    { "tag",    required_argument,  0, 't' },
+    { "dir",    required_argument,  0, 'd' }
   };
 
   enum command cmd = help_command;
   char *cron_dir = CRON_DIR;
+  char *tag = NULL;
   for (;;) {
     int index;
-    int c = getopt_long(argc, argv, "hld:0", long_opts, &index);
+    int c = getopt_long(argc, argv, "hlard:t:", long_opts, &index);
     if (c == -1) {
       break;
     }
     switch (c) {
+      /* commands */
       case 'l':
         cmd = list_command;
+        break;
+      case 'a':
+        cmd = tag_command;
+        break;
+      case 'r':
+        cmd = untag_command;
         break;
       case 'h':
         cmd = help_command;
         break;
+      /* command modifiers */
       case 'd':
         cron_dir = optarg;
         break;
+      case 't':
+        tag = optarg;
+        break;
+    }
+  }
+  int n = argc - optind;
+  unsigned int *uron_ids =
+    (unsigned int *) xmalloc(sizeof(unsigned int) * n);
+  if (n > 0) {
+    int i, j;
+    unsigned int tmpid;
+    for (i = optind, j = 0; i < argc; i++, j++) {
+      sscanf(argv[i], "%u", &tmpid);
+      uron_ids[j] = tmpid;
     }
   }
 
   switch (cmd) {
     case help_command:
       help();
+      break;
+    case tag_command:
+      addtag(tag, uron_ids, n);
+      break;
+    case untag_command:
+      rmtag(tag, uron_ids, n);
       break;
     case list_command:
       list(cron_dir);
