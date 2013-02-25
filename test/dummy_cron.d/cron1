@@ -1,3 +1,3 @@
-0 8 * * * masato echo good morning
-0 12 * * * masato echo good afternoon
-0 22 * * * masato echo good night
+0 8 * * * masato-nagai echo good morning
+0 12 * * * masato-nagai echo good afternoon
+0 22 * * * masato-nagai echo good night

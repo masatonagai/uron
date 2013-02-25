@@ -9,27 +9,22 @@
 
 #include "uron.h"
 
-static void run_command(const char *username, const char *command) {
+static void run_command(const struct uron_struct *uron) {
   struct passwd p, *result;
   char buff[sysconf(_SC_GETPW_R_SIZE_MAX)];
-  if (getpwnam_r(username, &p, buff, sizeof(buff), &result) != 0) {
+  if (getpwnam_r((*(*uron).cron).username, &p, buff, sizeof(buff), &result) != 0) {
     perror("getpwnam_r");
   } else {
-    printf("name:%s, id:%ld\n", p.pw_name, (long int) p.pw_uid);
-    printf("command=%s", command);
+    printf("%u %s %s\n", (*uron).id, p.pw_name, (*(*uron).cron).command);
     setuid(p.pw_uid);
-    // TODO unescape '%'
-    // http://linux.die.net/man/3/system
-    system(command);
+    system((*(*uron).cron).command);
   }
 }
 
-void exec(const char *tag, const char *cron_dir) {
+void exec(const char *tag, const unsigned int *ids, int n, const char *cron_dir) {
   struct uron_struct **urons;
-  int uron_c = geturons(&urons, tag, cron_dir);
+  int uron_c = geturons(&urons, tag, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {
-    struct uron_struct *uron = urons[i];
-    struct cron_struct *cron = (*uron).cron;
-    run_command((*cron).username, (*cron).command);
+    run_command(urons[i]);
   }
 }

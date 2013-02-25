@@ -194,7 +194,17 @@ int dgeturons(struct uron_struct ***urons) {
   return uron_c;
 }
 
-int geturons(struct uron_struct ***urons, const char *tag, const char *cron_dir) {
+int ided(const struct uron_struct *uron, const unsigned int *ids, int n) {
+  for (int i = 0; i < n; i++) {
+    if ((*uron).id == ids[i]) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int geturons(struct uron_struct ***urons, const char *tag, 
+    const unsigned int *ids, int n, const char *cron_dir) {
   struct cron_struct **crons;
   int cron_c = dgetcrons(&crons, cron_dir);
   struct uron_struct **tmp_urons; 
@@ -215,7 +225,7 @@ int geturons(struct uron_struct ***urons, const char *tag, const char *cron_dir)
       struct uron_struct *uron = makeuron(cron);
       saveuron(uron);
       tmp_uron_c++;
-      tmp_urons = xrealloc(urons, sizeof(struct uron_struct *) * tmp_uron_c);
+      tmp_urons = xrealloc(tmp_urons, sizeof(struct uron_struct *) * tmp_uron_c);
       tmp_urons[tmp_uron_c - 1] = uron;
     }
   }
@@ -231,7 +241,10 @@ int geturons(struct uron_struct ***urons, const char *tag, const char *cron_dir)
         break;
       }
     }
-    if (alive && (!tag || tagged(uron, tag))) {
+    if (alive &&
+        (!n || ided(uron, ids, n)) &&
+        (!tag || tagged(uron, tag))
+        ) {
       (*urons)[uron_c] = uron;
       uron_c++;
     } else {
@@ -333,10 +346,10 @@ int main(int argc, char **argv) {
       rmtag(tag, uron_ids, n);
       break;
     case list_command:
-      list(tag, cron_dir);
+      list(tag, uron_ids, n, cron_dir);
       break;
     case exec_command:
-      exec(tag, cron_dir);
+      exec(tag, uron_ids, n, cron_dir);
       break;
   }
 

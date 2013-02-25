@@ -22,62 +22,9 @@
 #define H_CMD "CMD"
 
 
-void list(const char *tag, const char *cron_dir) {
-  /*
-  struct cron_struct **crons;
-  int cron_c = dgetcrons(&crons, cron_dir);
+void list(const char *tag, const unsigned int *ids, int n, const char *cron_dir) {
   struct uron_struct **urons;
-  int uron_c = dgeturons(&urons);
-  int i, j;
-  for (i = 0; i < cron_c; i++) {
-    struct cron_struct *cron = crons[i];
-    int known = 0;
-    for (j = 0; j < uron_c; j++) {
-      struct uron_struct *uron = urons[j];
-      if (eqcron(cron, (*uron).cron)) {
-        known = 1;
-        break;
-      }
-    }
-    if (!known) {
-      struct uron_struct *uron = makeuron(cron);
-      saveuron(uron);
-      uron_c++;
-      urons = xrealloc(urons, sizeof(struct uron_struct *) * uron_c);
-      urons[uron_c - 1] = uron;
-    }
-  }
-  struct uron_struct **aurons = xmalloc(sizeof(struct uron_struct *) * uron_c);
-  int auron_c = 0;
-  for (i = 0; i < uron_c; i++) {
-    struct uron_struct *uron = urons[i];
-    int alive = 0;
-    for (j = 0; j < cron_c; j++) {
-      struct cron_struct *cron = crons[j];
-      if (eqcron(cron, (*uron).cron)) {
-        alive = 1;
-        break;
-      }
-    }
-    if (alive && (!tag || tagged(uron, tag))) {
-      aurons[auron_c] = uron;
-      auron_c++;
-    } else {
-      freeuron(uron);
-    }
-  }
-  for (i = 0; i < cron_c; i++) {
-    // double free ?
-    // freecron(crons[i]);
-  }
-  free(crons);
-  free(urons);
-  uron_c = auron_c;
-  urons = aurons;
-  */
-
-  struct uron_struct **urons;
-  int uron_c = geturons(&urons, tag, cron_dir);
+  int uron_c = geturons(&urons, tag, ids, n, cron_dir);
 
   printf("TOTAL: %d\n", uron_c);
 
