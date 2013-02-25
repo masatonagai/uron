@@ -270,6 +270,7 @@ static void help() {
     "    -l, --list     list jobs\n"
     "    -a, --add      add tag to job\n"
     "    -r, --remove   remove tag from job\n"
+    "    -x, --exec     execute job command\n"
     "  command modifiers:\n"
     "    -t, --tag      tag\n"
     "    -d, --dir      cron dir (default is \"%s\")\n",
@@ -284,6 +285,7 @@ int main(int argc, char **argv) {
     { "list",   no_argument,        0, 'l' },
     { "add",    no_argument,        0, 'a' },
     { "remove", no_argument,        0, 'r' },
+    { "exec",   no_argument,        0, 'x' },
     { "tag",    required_argument,  0, 't' },
     { "dir",    required_argument,  0, 'd' }
   };
