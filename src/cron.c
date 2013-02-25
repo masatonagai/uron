@@ -118,7 +118,7 @@ struct cron_struct * getcron(const char *s) {
   return cron;
 }
 
-int dgetcrons(struct cron_struct ***crons, char *dirname) {
+int dgetcrons(struct cron_struct ***crons, const char *dirname) {
   (*crons) = NULL;
   int cron_c = 0;
 

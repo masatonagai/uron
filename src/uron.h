@@ -15,6 +15,7 @@ void saveuron(struct uron_struct *);
 struct uron_struct * makeuron(struct cron_struct *);
 struct uron_struct * geturon(char *);
 int fgeturons(struct uron_struct ***, FILE *);
-int dgeturons(struct uron_struct ***);
+int dgeturons(struct uron_struct ***urons);
+int geturons(struct uron_struct ***urons, const char *tag, const char *cron_dir);
 
 #endif /* URON_H */

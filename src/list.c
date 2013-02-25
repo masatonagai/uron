@@ -22,7 +22,8 @@
 #define H_CMD "CMD"
 
 
-void list(const char *tag, char *cron_dir) {
+void list(const char *tag, const char *cron_dir) {
+  /*
   struct cron_struct **crons;
   int cron_c = dgetcrons(&crons, cron_dir);
   struct uron_struct **urons;
@@ -66,13 +67,17 @@ void list(const char *tag, char *cron_dir) {
     }
   }
   for (i = 0; i < cron_c; i++) {
-    /* double free ? */
+    // double free ?
     // freecron(crons[i]);
   }
   free(crons);
   free(urons);
   uron_c = auron_c;
   urons = aurons;
+  */
+
+  struct uron_struct **urons;
+  int uron_c = geturons(&urons, tag, cron_dir);
 
   printf("TOTAL: %d\n", uron_c);
 
@@ -90,6 +95,7 @@ void list(const char *tag, char *cron_dir) {
   int h_usr_len = strlen(H_USR);
   int h_cmd_len = strlen(H_CMD);
   char id[11 + 1];
+  int i;
   for (i = 0; i < uron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;

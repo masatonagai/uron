@@ -18,14 +18,15 @@
 #include "io.h"
 #include "list.h"
 #include "tag.h"
+#include "exec.h"
 
 #define URON_LINE_MAX 512 /* includes newline character */
 #define URON_LINE_PADCHAR '\r'
 #define URON_ID_MIN 1
 
 enum command {
-  help_command, list_command, tag_command, untag_command
-
+  help_command, list_command, tag_command, untag_command,
+  exec_command
 };
 
 void freeuron(struct uron_struct *uron) {
@@ -193,6 +194,61 @@ int dgeturons(struct uron_struct ***urons) {
   return uron_c;
 }
 
+int geturons(struct uron_struct ***urons, const char *tag, const char *cron_dir) {
+  struct cron_struct **crons;
+  int cron_c = dgetcrons(&crons, cron_dir);
+  struct uron_struct **tmp_urons; 
+  int tmp_uron_c = dgeturons(&tmp_urons);
+
+  int i, j;
+  for (i = 0; i < cron_c; i++) {
+    struct cron_struct *cron = crons[i];
+    int known = 0;
+    for (j = 0; j < tmp_uron_c; j++) {
+      struct uron_struct *uron = tmp_urons[j];
+      if (eqcron(cron, (*uron).cron)) {
+        known = 1;
+        break;
+      }
+    }
+    if (!known) {
+      struct uron_struct *uron = makeuron(cron);
+      saveuron(uron);
+      tmp_uron_c++;
+      tmp_urons = xrealloc(urons, sizeof(struct uron_struct *) * tmp_uron_c);
+      tmp_urons[tmp_uron_c - 1] = uron;
+    }
+  }
+  (*urons) = xmalloc(sizeof(struct uron_struct *) * tmp_uron_c);
+  int uron_c = 0;
+  for (i = 0; i < tmp_uron_c; i++) {
+    struct uron_struct *uron = tmp_urons[i];
+    int alive = 0;
+    for (j = 0; j < cron_c; j++) {
+      struct cron_struct *cron = crons[j];
+      if (eqcron(cron, (*uron).cron)) {
+        alive = 1;
+        break;
+      }
+    }
+    if (alive && (!tag || tagged(uron, tag))) {
+      (*urons)[uron_c] = uron;
+      uron_c++;
+    } else {
+      freeuron(uron);
+    }
+  }
+  for (i = 0; i < cron_c; i++) {
+    /* double free ? */
+    // freecron(crons[i]);
+  }
+  free(crons);
+  free(tmp_urons);
+
+  return uron_c;
+}
+
+
 static void help() {
   fprintf(stderr,
     "usage: uron [option(s)] [id(s)]\n"
@@ -224,7 +280,7 @@ int main(int argc, char **argv) {
   char *tag = NULL;
   for (;;) {
     int index;
-    int c = getopt_long(argc, argv, "hlard:t:", long_opts, &index);
+    int c = getopt_long(argc, argv, "hlarxd:t:", long_opts, &index);
     if (c == -1) {
       break;
     }
@@ -238,6 +294,9 @@ int main(int argc, char **argv) {
         break;
       case 'r':
         cmd = untag_command;
+        break;
+      case 'x':
+        cmd = exec_command;
         break;
       case 'h':
         cmd = help_command;
@@ -275,6 +334,9 @@ int main(int argc, char **argv) {
       break;
     case list_command:
       list(tag, cron_dir);
+      break;
+    case exec_command:
+      exec(tag, cron_dir);
       break;
   }
 
