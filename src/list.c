@@ -11,6 +11,7 @@
 #include "term.h"
 #include "tag.h"
 
+#define URON_COLUMNS 9
 #define H_ID "ID"
 #define H_TAG "TAG"
 #define H_MIN "MIN"
@@ -40,7 +41,6 @@ void list(const char *tag, const unsigned int *ids, int n, const char *cron_dir)
   int h_mon_len = strlen(H_MON);
   int h_dow_len = strlen(H_DOW);
   int h_usr_len = strlen(H_USR);
-  int h_cmd_len = strlen(H_CMD);
   char id[11 + 1];
   int i;
   for (i = 0; i < uron_c; i++) {
@@ -56,37 +56,51 @@ void list(const char *tag, const unsigned int *ids, int n, const char *cron_dir)
     h_mon_len = MAX(h_mon_len, strlen((*cron).month));
     h_dow_len = MAX(h_dow_len, strlen((*cron).day_of_week));
     h_usr_len = MAX(h_usr_len, strlen((*cron).username));
-    h_cmd_len = MAX(h_cmd_len, strlen((*cron).command));
   }
-
   struct term_struct term = terminfo();
-  int buff_size = term.columns;
-  char *buff = xmalloc(buff_size);
+  int h_cmd_len = term.columns - 
+    (h_id_len + h_tag_len + h_min_len + h_hr_len + h_dom_len + h_mon_len + 
+     h_dow_len + h_usr_len + (URON_COLUMNS - 1));
+
+  const char * const header_prefix = "\e[7m";
+  const char * const header_suffix = "\e[0m\n";
+  const int header_buff_size = term.columns + strlen(header_prefix) + strlen(header_suffix) + 1;
+  char header_buff[header_buff_size];
   int chars;
-  chars = snprintf(buff, buff_size,
-      "\e[7m%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\e[0m\n",
+  snprintf(header_buff, header_buff_size,
+      "%s%%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds%s",
+      header_prefix,
       h_id_len, h_tag_len,
       h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
-      h_usr_len, h_cmd_len);
-  if (buff[chars - 1] != '\n') {
-    buff[chars - 1] = '\n';
-  }
-  printf(buff, H_ID, H_TAG, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
-  chars = snprintf(buff, buff_size,
-      "%%-%dd %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds\n",
+      h_usr_len, h_cmd_len,
+      header_suffix);
+  const char * const header_format = strdup(header_buff);
+  chars = snprintf(header_buff, header_buff_size, header_format, H_ID, H_TAG, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
+  fputs(header_buff, stdout);
+
+  const char * const row_prefix = "\e[0m";
+  const char * const row_suffix = "\e[0m\n";
+  const int row_buff_size = term.columns + strlen(row_prefix) + strlen(row_suffix);
+  char row_buff[row_buff_size];
+  snprintf(row_buff, row_buff_size,
+      "%s%%-%dd %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds%s",
+      row_prefix,
       h_id_len, h_tag_len,
       h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
-      h_usr_len, h_cmd_len);
-  if (buff[chars - 1] != '\n') {
-    buff[chars - 1] = '\n';
-  }
+      h_usr_len, h_cmd_len,
+      row_suffix);
+  char command[h_cmd_len + 1];
+  const char * const row_format = strdup(row_buff);
   for (i = 0; i < uron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;
     char *tagx;
     tagstox(&tagx, (const char **) (*uron).tags, (*uron).tag_n);
-    printf(
-        buff,
+    strncpy(command, (*cron).command, h_cmd_len);
+    chars = snprintf(
+        row_buff,
+        row_buff_size,
+        row_format,
         (*uron).id,
         tagx,
         (*cron).minute,
@@ -95,10 +109,10 @@ void list(const char *tag, const unsigned int *ids, int n, const char *cron_dir)
         (*cron).month,
         (*cron).day_of_week,
         (*cron).username,
-        (*cron).command);
+        command);
+    fputs(row_buff, stdout);
     freeuron(uron);
   }
-  free(buff);
   free(urons);
   exit(EXIT_SUCCESS);
 }
