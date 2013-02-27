@@ -122,6 +122,7 @@ struct uron_struct * geturon(char *s) {
   char **match;
   int match_c = regmatch(&match, s, p, 4);
   if (match_c != 4) {
+    regmatchfree(&match, match_c);
     return NULL;
   }
   unsigned int id;
@@ -132,6 +133,8 @@ struct uron_struct * geturon(char *s) {
   struct cron_struct *cron = getcron(cronx);
   char **tags;
   int tag_n = gettags(&tags, tagx);
+
+  regmatchfree(&match, match_c);
 
   struct uron_struct *uron = malloc(sizeof(struct uron_struct));
   (*uron).id = id;

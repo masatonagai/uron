@@ -30,6 +30,13 @@ void * xrealloc(void *p, size_t size) {
   return np;
 }
 
+void regmatchfree(char ***match, int match_c) {
+  for (int i = 0; i < match_c; i++) {
+    free((*match)[i]);
+  }
+  free(*match);
+}
+
 int regmatch(char ***match, const char *s, const char *pattern, int max) {
   (*match) = (char **) xmalloc(sizeof(char *) * max);
 
@@ -41,8 +48,8 @@ int regmatch(char ***match, const char *s, const char *pattern, int max) {
     exit(EXIT_FAILURE);
   }
   if (regexec(&regex, s, (size_t) max, pmatch, 0) != REG_NOERROR) {
-    return 0;
     regfree(&regex);
+    return 0;
   }
   regfree(&regex);
 
