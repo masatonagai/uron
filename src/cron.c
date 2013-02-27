@@ -75,6 +75,21 @@ static struct cron_struct * makecron(
   return cron;
 }
 
+static int unescape_command(char *unescaped, const char *escaped) {
+  int unescaped_len = 0;
+  for (int i = 0, n = strlen(escaped); i < n; i++) {
+    // quote from man of crontab(5):
+    //   Percent-signs  (%)  in  the  command, unless escaped with backslash (\),
+    //   will be changed into newline characters"
+    if (i < (n - 1) && escaped[i] == '\\' && escaped[i + 1] == '%') {
+      continue;
+    }
+    unescaped[unescaped_len++] = escaped[i];
+  }
+  unescaped[unescaped_len] = '\0';
+  return unescaped_len;
+}
+
 struct cron_struct * getcron(const char *s) {
   regex_t regex;
   regmatch_t pmatch[N_MATCH];
@@ -108,9 +123,11 @@ struct cron_struct * getcron(const char *s) {
   if (match_c != N_MATCH) {
     return NULL;
   }
+  char command[strlen(match[7]) + 1];
+  unescape_command(command, match[7]);
   struct cron_struct *cron = makecron(
       match[1], match[2], match[3], match[4], match[5],
-      match[6], match[7]);
+      match[6], command);
   int i;
   for (i = 0; i < match_c; i++) {
     free(match[i]);
