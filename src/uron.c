@@ -291,7 +291,7 @@ int main(int argc, char **argv) {
     { "remove",  required_argument,  0, 'r' },
     { "exec",    no_argument,        0, 'x' },
     { "tag",     required_argument,  0, 't' },
-    { "no-tags", no_argument,        0, 't' },
+    { "no-tags", no_argument,        0, 'n' },
     { "dir",     required_argument,  0, 'd' }
   };
 
