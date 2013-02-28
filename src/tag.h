@@ -3,6 +3,7 @@
 
 #define URON_TAG_MAX 32
 #define URON_TAG_SP ","
+#define URON_NO_TAGS "__no_tags"
 
 #include "uron.h"
 

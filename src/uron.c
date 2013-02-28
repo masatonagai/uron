@@ -276,6 +276,7 @@ static void help() {
     "    -x, --exec         execute job command\n"
     "  command modifiers:\n"
     "    -t, --tag=tag      select jobs have the tag\n"
+    "    -n, --no-tags      select jobs do not have any tags\n"
     "    -d, --dir          cron dir (default is \"%s\")\n",
     CRON_DIR
     );
@@ -284,13 +285,14 @@ static void help() {
 
 int main(int argc, char **argv) {
   struct option long_opts[] = {
-    { "help",   no_argument,        0, 'h' },
-    { "list",   no_argument,        0, 'l' },
-    { "add",    required_argument,  0, 'a' },
-    { "remove", required_argument,  0, 'r' },
-    { "exec",   no_argument,        0, 'x' },
-    { "tag",    required_argument,  0, 't' },
-    { "dir",    required_argument,  0, 'd' }
+    { "help",    no_argument,        0, 'h' },
+    { "list",    no_argument,        0, 'l' },
+    { "add",     required_argument,  0, 'a' },
+    { "remove",  required_argument,  0, 'r' },
+    { "exec",    no_argument,        0, 'x' },
+    { "tag",     required_argument,  0, 't' },
+    { "no-tags", no_argument,        0, 't' },
+    { "dir",     required_argument,  0, 'd' }
   };
 
   enum command cmd = help_command;
@@ -299,7 +301,7 @@ int main(int argc, char **argv) {
   char *tag_for_read = NULL;
   for (;;) {
     int index;
-    int c = getopt_long(argc, argv, "hlxa:r:d:t:", long_opts, &index);
+    int c = getopt_long(argc, argv, "hlxa:r:d:t:n", long_opts, &index);
     if (c == -1) {
       break;
     }
@@ -328,6 +330,9 @@ int main(int argc, char **argv) {
         break;
       case 't':
         tag_for_read = optarg;
+        break;
+      case 'n':
+        tag_for_read = URON_NO_TAGS;
         break;
     }
   }

@@ -6,8 +6,10 @@
 #include "util.h"
 
 int tagged(const struct uron_struct *uron, const char *tag) {
-  int i, n;
-  for (i = 0, n = (*uron).tag_n; i < n; i++) {
+  if (strcmp(tag, URON_NO_TAGS) == 0) {
+    return (*uron).tag_n == 0 ? 1 : 0;
+  }
+  for (int i = 0, n = (*uron).tag_n; i < n; i++) {
     if (strcmp((*uron).tags[i], tag) == 0) {
       return 1;
     }
