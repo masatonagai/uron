@@ -48,15 +48,15 @@ int gettags(char ***tags, const char *tagx) {
   return tag_n;
 }
 
-void addtag(const char *tag_for_write, const char *tag_for_read, const unsigned int *ids, int n,
-    const char *cron_dir) {
+void addtag(const char *tag_for_write, const char *username, const char *tag_for_read,
+    const unsigned int *ids, int n, const char *cron_dir) {
   if (tag_for_read && strcmp(tag_for_write, tag_for_read) == 0) {
     // already tagged
     return;
   }
   /* TODO throw error if the tag contains space char */
   struct uron_struct **urons;
-  int uron_c = geturons(&urons, tag_for_read, ids, n, cron_dir);
+  int uron_c = geturons(&urons, username, tag_for_read, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {
     struct uron_struct *uron = urons[i];
     (*uron).tag_n++;
@@ -68,10 +68,10 @@ void addtag(const char *tag_for_write, const char *tag_for_read, const unsigned 
   free(urons);
 }
 
-void rmtag(const char *tag_for_write, const char *tag_for_read, const unsigned int *ids, int n,
-    const char *cron_dir) {
+void rmtag(const char *tag_for_write, const char *username, const char *tag_for_read,
+    const unsigned int *ids, int n, const char *cron_dir) {
   struct uron_struct **urons;
-  int uron_c = geturons(&urons, tag_for_read, ids, n, cron_dir);
+  int uron_c = geturons(&urons, username, tag_for_read, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {
     struct uron_struct *uron = urons[i];
     for (int k = 0; k < (*uron).tag_n; k++) {

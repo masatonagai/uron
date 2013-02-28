@@ -206,7 +206,11 @@ int ided(const struct uron_struct *uron, const unsigned int *ids, int n) {
   return 0;
 }
 
-int geturons(struct uron_struct ***urons, const char *tag, 
+int owned(const struct uron_struct *uron, const char *username) {
+  return strcmp((*(*uron).cron).username, username) == 0 ? 1 : 0;
+}
+
+int geturons(struct uron_struct ***urons, const char *username, const char *tag, 
     const unsigned int *ids, int n, const char *cron_dir) {
   struct cron_struct **crons;
   int cron_c = dgetcrons(&crons, cron_dir);
@@ -245,6 +249,7 @@ int geturons(struct uron_struct ***urons, const char *tag,
       }
     }
     if (alive &&
+        (!username || owned(uron, username)) &&
         (!n || ided(uron, ids, n)) &&
         (!tag || tagged(uron, tag))
         ) {
@@ -275,6 +280,7 @@ static void help() {
     "    -r, --remove=tag   remove the tag from job\n"
     "    -x, --exec         execute job command\n"
     "  command modifiers:\n"
+    "    -u, --user=user    select jobs of the user\n"
     "    -t, --tag=tag      select jobs have the tag\n"
     "    -n, --no-tags      select jobs do not have any tags\n"
     "    -d, --dir          cron dir (default is \"%s\")\n",
@@ -290,6 +296,7 @@ int main(int argc, char **argv) {
     { "add",     required_argument,  0, 'a' },
     { "remove",  required_argument,  0, 'r' },
     { "exec",    no_argument,        0, 'x' },
+    { "user",    required_argument,  0, 'u' },
     { "tag",     required_argument,  0, 't' },
     { "no-tags", no_argument,        0, 'n' },
     { "dir",     required_argument,  0, 'd' }
@@ -299,9 +306,10 @@ int main(int argc, char **argv) {
   char *cron_dir = CRON_DIR;
   char *tag_for_write = NULL;
   char *tag_for_read = NULL;
+  char *username = NULL;
   for (;;) {
     int index;
-    int c = getopt_long(argc, argv, "hlxa:r:d:t:n", long_opts, &index);
+    int c = getopt_long(argc, argv, "hlxa:r:d:u:t:n", long_opts, &index);
     if (c == -1) {
       break;
     }
@@ -328,6 +336,9 @@ int main(int argc, char **argv) {
       case 'd':
         cron_dir = optarg;
         break;
+      case 'u':
+        username = optarg;
+        break;
       case 't':
         tag_for_read = optarg;
         break;
@@ -353,16 +364,16 @@ int main(int argc, char **argv) {
       help();
       break;
     case tag_command:
-      addtag(tag_for_write, tag_for_read, uron_ids, n, cron_dir);
+      addtag(tag_for_write, username, tag_for_read, uron_ids, n, cron_dir);
       break;
     case untag_command:
-      rmtag(tag_for_write, tag_for_read, uron_ids, n, cron_dir);
+      rmtag(tag_for_write, username, tag_for_read, uron_ids, n, cron_dir);
       break;
     case list_command:
-      list(tag_for_read, uron_ids, n, cron_dir);
+      list(username, tag_for_read, uron_ids, n, cron_dir);
       break;
     case exec_command:
-      exec(tag_for_read, uron_ids, n, cron_dir);
+      exec(username, tag_for_read, uron_ids, n, cron_dir);
       break;
   }
 

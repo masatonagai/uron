@@ -7,10 +7,10 @@
 
 #include "uron.h"
 
-void addtag(const char *tag, const char *tag_for_read, const unsigned int *ids, int n, 
-    const char *cron_dir);
-void rmtag(const char *tag, const char *tag_for_read, const unsigned int *ids, int n,
-    const char *cron_dir);
+void addtag(const char *tag, const char *username, const char *tag_for_read,
+    const unsigned int *ids, int n, const char *cron_dir);
+void rmtag(const char *tag, const char *username, const char *tag_for_read, 
+    const unsigned int *ids, int n, const char *cron_dir);
 int tagstox(char **, const char **, int);
 int gettags(char ***, const char *);
 int tagged(const struct uron_struct *, const char *);

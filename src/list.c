@@ -23,9 +23,10 @@
 #define H_CMD "CMD"
 
 
-void list(const char *tag, const unsigned int *ids, int n, const char *cron_dir) {
+void list(const char *username, const char *tag, const unsigned int *ids, 
+    int n, const char *cron_dir) {
   struct uron_struct **urons;
-  int uron_c = geturons(&urons, tag, ids, n, cron_dir);
+  int uron_c = geturons(&urons, username, tag, ids, n, cron_dir);
 
   printf("TOTAL: %d\n", uron_c);
 
@@ -96,7 +97,8 @@ void list(const char *tag, const unsigned int *ids, int n, const char *cron_dir)
     struct cron_struct *cron = (*uron).cron;
     char *tagx;
     tagstox(&tagx, (const char **) (*uron).tags, (*uron).tag_n);
-    strncpy(command, (*cron).command, h_cmd_len);
+    strncpy(command, (*cron).command, sizeof(command) - 1);
+    command[sizeof(command) - 1] = '\0';
     chars = snprintf(
         row_buff,
         row_buff_size,
