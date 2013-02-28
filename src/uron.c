@@ -283,7 +283,7 @@ static void help() {
     "    -u, --user=user    select jobs of the user\n"
     "    -t, --tag=tag      select jobs have the tag\n"
     "    -n, --no-tags      select jobs do not have any tags\n"
-    "    -d, --dir          cron dir (default is \"%s\")\n",
+    "    -d, --dir          switch the cron dir (default is \"%s\")\n",
     CRON_DIR
     );
   exit(EXIT_FAILURE);
