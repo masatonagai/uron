@@ -143,7 +143,7 @@ int dgetcrons(struct cron_struct ***crons, const char *dirname) {
   struct dirent *entry;
   char path[PATH_MAX];
   while ((entry = readdir(dir)) != NULL) {
-    if ((*entry).d_type == DT_REG) {
+    if ((*entry).d_type == DT_REG || (*entry).d_type == RT_LNK) {
       const char *filename = (*entry).d_name;
       if (*filename != '.') {
         snprintf(path, PATH_MAX, "%s/%s", dirname, filename);
