@@ -269,14 +269,14 @@ static void help() {
   fprintf(stderr,
     "usage: uron [option(s)] [id(s)]\n"
     "  commands:\n"
-    "    -h, --help     show this help\n"
-    "    -l, --list     list jobs\n"
-    "    -a, --add      add tag to job\n"
-    "    -r, --remove   remove tag from job\n"
-    "    -x, --exec     execute job command\n"
+    "    -h, --help         show this help\n"
+    "    -l, --list         list jobs\n"
+    "    -a, --add=tag      add the tag to job\n"
+    "    -r, --remove=tag   remove the tag from job\n"
+    "    -x, --exec         execute job command\n"
     "  command modifiers:\n"
-    "    -t, --tag      tag\n"
-    "    -d, --dir      cron dir (default is \"%s\")\n",
+    "    -t, --tag=tag      select jobs have the tag\n"
+    "    -d, --dir          cron dir (default is \"%s\")\n",
     CRON_DIR
     );
   exit(EXIT_FAILURE);
@@ -286,8 +286,8 @@ int main(int argc, char **argv) {
   struct option long_opts[] = {
     { "help",   no_argument,        0, 'h' },
     { "list",   no_argument,        0, 'l' },
-    { "add",    no_argument,        0, 'a' },
-    { "remove", no_argument,        0, 'r' },
+    { "add",    required_argument,  0, 'a' },
+    { "remove", required_argument,  0, 'r' },
     { "exec",   no_argument,        0, 'x' },
     { "tag",    required_argument,  0, 't' },
     { "dir",    required_argument,  0, 'd' }
@@ -295,10 +295,11 @@ int main(int argc, char **argv) {
 
   enum command cmd = help_command;
   char *cron_dir = CRON_DIR;
-  char *tag = NULL;
+  char *tag_for_write = NULL;
+  char *tag_for_read = NULL;
   for (;;) {
     int index;
-    int c = getopt_long(argc, argv, "hlarxd:t:", long_opts, &index);
+    int c = getopt_long(argc, argv, "hlxa:r:d:t:", long_opts, &index);
     if (c == -1) {
       break;
     }
@@ -309,9 +310,11 @@ int main(int argc, char **argv) {
         break;
       case 'a':
         cmd = tag_command;
+        tag_for_write = optarg;
         break;
       case 'r':
         cmd = untag_command;
+        tag_for_write = optarg;
         break;
       case 'x':
         cmd = exec_command;
@@ -324,7 +327,7 @@ int main(int argc, char **argv) {
         cron_dir = optarg;
         break;
       case 't':
-        tag = optarg;
+        tag_for_read = optarg;
         break;
     }
   }
@@ -345,16 +348,16 @@ int main(int argc, char **argv) {
       help();
       break;
     case tag_command:
-      addtag(tag, uron_ids, n);
+      addtag(tag_for_write, uron_ids, n);
       break;
     case untag_command:
-      rmtag(tag, uron_ids, n);
+      rmtag(tag_for_write, uron_ids, n);
       break;
     case list_command:
-      list(tag, uron_ids, n, cron_dir);
+      list(tag_for_read, uron_ids, n, cron_dir);
       break;
     case exec_command:
-      exec(tag, uron_ids, n, cron_dir);
+      exec(tag_for_read, uron_ids, n, cron_dir);
       break;
   }
 
