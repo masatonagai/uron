@@ -353,10 +353,10 @@ int main(int argc, char **argv) {
       help();
       break;
     case tag_command:
-      addtag(tag_for_write, uron_ids, n);
+      addtag(tag_for_write, tag_for_read, uron_ids, n, cron_dir);
       break;
     case untag_command:
-      rmtag(tag_for_write, uron_ids, n);
+      rmtag(tag_for_write, tag_for_read, uron_ids, n, cron_dir);
       break;
     case list_command:
       list(tag_for_read, uron_ids, n, cron_dir);
