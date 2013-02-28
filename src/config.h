@@ -1,0 +1,1 @@
+#define HAVE_LIBCURSES 0

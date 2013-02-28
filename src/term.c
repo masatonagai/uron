@@ -1,9 +1,15 @@
 #include "term.h"
+#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/ioctl.h>
+
+#if HAVE_LIBCURSES
 #include <curses.h>
 #include <term.h>
+#endif /* HAVE_LIBCURSES */
 
 struct term_struct terminfo() {
   /* don't use "columns" or "lines" that are macro defined in term.h */
@@ -18,6 +24,7 @@ struct term_struct terminfo() {
   if (s && *s) {
     rows = atoi(s);
   }
+#if HAVE_LIBCURSES
   if (!(cols && rows)) {
     char *term_name = getenv("TERM");
     if (term_name && *term_name) {
@@ -31,6 +38,13 @@ struct term_struct terminfo() {
         }
       }
     }
+  }
+#endif /* HAVE_LIBCURSES */
+  if (!(cols && rows)) {
+    struct winsize ws;
+    ioctl(1, TIOCGWINSZ, &ws);
+    cols = ws.ws_col;
+    rows = ws.ws_row;
   }
   if (!(cols && rows)) {
     fprintf(stderr, "failed to get terminal info");
