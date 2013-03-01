@@ -2,7 +2,7 @@
 CC = gcc -std=gnu99
 
 # compiler flags
-CFLAGS = -g -O0 -Wall -lcurses
+CFLAGS = -g -O0 -Wall
 
 SOURCES = src/*.c
 
