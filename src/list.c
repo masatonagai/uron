@@ -64,7 +64,7 @@ void list(const char *username, const char *tag, const unsigned int *ids,
      h_dow_len + h_usr_len + (URON_COLUMNS - 1));
 
   const char * const header_prefix = "\e[7m";
-  const char * const header_suffix = "\e[0m\n";
+  const char * const header_suffix = "\e[0m";
   const int header_buff_size = term.columns + strlen(header_prefix) + strlen(header_suffix) + 1;
   char header_buff[header_buff_size];
   int chars;
@@ -77,18 +77,18 @@ void list(const char *username, const char *tag, const unsigned int *ids,
       header_suffix);
   const char * const header_format = strdup(header_buff);
   chars = snprintf(header_buff, header_buff_size, header_format, H_ID, H_TAG, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
-  fputs(header_buff, stdout);
+  puts(header_buff);
 
   const char * const row_prefix = "\e[0m";
-  const char * const row_suffix = "\e[0m\n";
+  const char * const row_suffix = "\e[0m";
   const int row_buff_size = term.columns + strlen(row_prefix) + strlen(row_suffix);
   char row_buff[row_buff_size];
   snprintf(row_buff, row_buff_size,
-      "%s%%-%dd %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds%s",
+      "%s%%-%dd %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-%ds %%-s%s",
       row_prefix,
       h_id_len, h_tag_len,
       h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
-      h_usr_len, h_cmd_len,
+      h_usr_len,
       row_suffix);
   char command[h_cmd_len + 1];
   const char * const row_format = strdup(row_buff);
@@ -112,7 +112,7 @@ void list(const char *username, const char *tag, const unsigned int *ids,
         (*cron).day_of_week,
         (*cron).username,
         command);
-    fputs(row_buff, stdout);
+    puts(row_buff);
     freeuron(uron);
   }
   free(urons);
