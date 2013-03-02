@@ -20,9 +20,9 @@ struct cron_struct {
   string command;
 };
 
-int dgetcrons(struct cron_struct ***, const string);
+int dgetcrons(struct cron_struct ***, cstring);
 int fgetcrons(struct cron_struct ***, FILE *);
-struct cron_struct * getcron(const string);
+struct cron_struct * getcron(cstring);
 void freecron(struct cron_struct *);
 int eqcron(struct cron_struct *, struct cron_struct *);
 int crontox(string *, struct cron_struct *);

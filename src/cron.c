@@ -82,7 +82,7 @@ static struct cron_struct * makecron(
   return cron;
 }
 
-static int unescape_command(string unescaped, const string escaped) {
+static int unescape_command(string unescaped, cstring escaped) {
   int unescaped_len = 0;
   for (int i = 0, n = strlen(escaped); i < n; i++) {
     // quote from man of crontab(5):
@@ -97,7 +97,7 @@ static int unescape_command(string unescaped, const string escaped) {
   return unescaped_len;
 }
 
-struct cron_struct * getcron(const string s) {
+struct cron_struct * getcron(cstring s) {
   regex_t regex;
   regmatch_t pmatch[N_MATCH];
   char pattern[256];
@@ -142,7 +142,7 @@ struct cron_struct * getcron(const string s) {
   return cron;
 }
 
-int dgetcrons(struct cron_struct ***crons, const string dirname) {
+int dgetcrons(struct cron_struct ***crons, cstring dirname) {
   (*crons) = NULL;
   int cron_c = 0;
 
@@ -151,7 +151,7 @@ int dgetcrons(struct cron_struct ***crons, const string dirname) {
   char path[PATH_MAX];
   while ((entry = readdir(dir)) != NULL) {
     if ((*entry).d_type == DT_REG || (*entry).d_type == DT_LNK) {
-      const string filename = (*entry).d_name;
+      cstring filename = (*entry).d_name;
       if (*filename != '.') {
         snprintf(path, PATH_MAX, "%s/%s", dirname, filename);
         FILE *stream = fopen(path, "r");

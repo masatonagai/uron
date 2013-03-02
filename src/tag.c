@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-int tagged(const struct uron_struct *uron, const string tag) {
+int tagged(const struct uron_struct *uron, cstring tag) {
   if (strcmp(tag, URON_NO_TAGS) == 0) {
     return (*uron).tag_n == 0 ? 1 : 0;
   }
@@ -22,7 +22,7 @@ int tagged(const struct uron_struct *uron, const string tag) {
   return 0;
 }
 
-int tagstox(string *tagx, const string *tags, int tag_n) {
+int tagstox(string *tagx, cstring *tags, int tag_n) {
   (*tagx) = (string) xmalloc(URON_TAG_MAX);
   size_t max_n = URON_TAG_MAX;
   int i;
@@ -37,7 +37,7 @@ int tagstox(string *tagx, const string *tags, int tag_n) {
   return strlen(*tagx);
 }
 
-int gettags(string **tags, const string tagx) {
+int gettags(string **tags, cstring tagx) {
   (*tags) = NULL;
   string pch;
   int tag_n = 0;
@@ -53,8 +53,8 @@ int gettags(string **tags, const string tagx) {
   return tag_n;
 }
 
-void addtag(const string tag_for_write, const string username, const string tag_for_read,
-    const unsigned int *ids, int n, const string cron_dir) {
+void addtag(cstring tag_for_write, cstring username, cstring tag_for_read,
+    const unsigned int *ids, int n, cstring cron_dir) {
   if (tag_for_read && strcmp(tag_for_write, tag_for_read) == 0) {
     // already tagged
     return;
@@ -73,8 +73,8 @@ void addtag(const string tag_for_write, const string username, const string tag_
   free(urons);
 }
 
-void rmtag(const string tag_for_write, const string username, const string tag_for_read,
-    const unsigned int *ids, int n, const string cron_dir) {
+void rmtag(cstring tag_for_write, cstring username, cstring tag_for_read,
+    const unsigned int *ids, int n, cstring cron_dir) {
   struct uron_struct **urons;
   int uron_c = geturons(&urons, username, tag_for_read, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {

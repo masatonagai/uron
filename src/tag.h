@@ -13,12 +13,12 @@
 #include "uron.h"
 #include "types.h"
 
-void addtag(const string tag, const string username, const string tag_for_read,
-    const unsigned int *ids, int n, const string cron_dir);
-void rmtag(const string tag, const string username, const string tag_for_read, 
-    const unsigned int *ids, int n, const string cron_dir);
-int tagstox(string *, const string *, int);
-int gettags(string **, const string);
-int tagged(const struct uron_struct *, const string);
+void addtag(cstring tag, cstring username, cstring tag_for_read,
+    const unsigned int *ids, int n, cstring cron_dir);
+void rmtag(cstring tag, cstring username, cstring tag_for_read, 
+    const unsigned int *ids, int n, cstring cron_dir);
+int tagstox(string *, cstring *, int);
+int gettags(string **, cstring);
+int tagged(const struct uron_struct *, cstring);
 
 #endif /* URON_TAG_H */

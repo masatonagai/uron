@@ -26,8 +26,8 @@ static void run_command(const struct uron_struct *uron) {
   }
 }
 
-void exec(const string username, const string tag, const unsigned int *ids,
-    int n, const string cron_dir) {
+void exec(cstring username, cstring tag, const unsigned int *ids,
+    int n, cstring cron_dir) {
   struct uron_struct **urons;
   int uron_c = geturons(&urons, username, tag, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {

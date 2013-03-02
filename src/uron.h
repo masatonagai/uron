@@ -22,7 +22,7 @@ struct uron_struct * makeuron(struct cron_struct *);
 struct uron_struct * geturon(string);
 int fgeturons(struct uron_struct ***, FILE *);
 int dgeturons(struct uron_struct ***urons);
-int geturons(struct uron_struct ***urons, const string username, const string tag, 
-    const unsigned int *ids, int n, const string cron_dir);
+int geturons(struct uron_struct ***urons, cstring username, cstring tag, 
+    const unsigned int *ids, int n, cstring cron_dir);
 
 #endif /* URON_H */

@@ -29,8 +29,8 @@
 #define H_CMD "CMD"
 
 
-void list(const string username, const string tag, const unsigned int *ids, 
-    int n, const string cron_dir) {
+void list(cstring username, cstring tag, const unsigned int *ids, 
+    int n, cstring cron_dir) {
   struct uron_struct **urons;
   int uron_c = geturons(&urons, username, tag, ids, n, cron_dir);
 
@@ -55,7 +55,7 @@ void list(const string username, const string tag, const unsigned int *ids,
     struct cron_struct *cron = (*uron).cron;
     string tagx;
     h_id_len = MAX(h_id_len, sprintf(id, "%u", (*uron).id));
-    h_tag_len = MAX(h_tag_len, tagstox(&tagx, (const string *) (*uron).tags, (*uron).tag_n));
+    h_tag_len = MAX(h_tag_len, tagstox(&tagx, (cstring *) (*uron).tags, (*uron).tag_n));
     free(tagx);
     h_min_len = MAX(h_min_len, strlen((*cron).minute));
     h_hr_len = MAX(h_hr_len, strlen((*cron).hour));
@@ -69,8 +69,8 @@ void list(const string username, const string tag, const unsigned int *ids,
     (h_id_len + h_tag_len + h_min_len + h_hr_len + h_dom_len + h_mon_len + 
      h_dow_len + h_usr_len + (URON_COLUMNS - 1));
 
-  const string const header_prefix = "\e[7m";
-  const string const header_suffix = "\e[0m";
+  cstring const header_prefix = "\e[7m";
+  cstring const header_suffix = "\e[0m";
   const int header_buff_size = term.columns + strlen(header_prefix) + strlen(header_suffix) + 1;
   char header_buff[header_buff_size];
   int chars;
@@ -81,12 +81,12 @@ void list(const string username, const string tag, const unsigned int *ids,
       h_min_len, h_hr_len, h_dom_len, h_mon_len, h_dow_len,
       h_usr_len, h_cmd_len,
       header_suffix);
-  const string const header_format = strdup(header_buff);
+  cstring const header_format = strdup(header_buff);
   chars = snprintf(header_buff, header_buff_size, header_format, H_ID, H_TAG, H_MIN, H_HR, H_DOM, H_MON, H_DOW, H_USR, H_CMD);
   puts(header_buff);
 
-  const string const row_prefix = "\e[0m";
-  const string const row_suffix = "\e[0m";
+  cstring const row_prefix = "\e[0m";
+  cstring const row_suffix = "\e[0m";
   const int row_buff_size = term.columns + strlen(row_prefix) + strlen(row_suffix);
   char row_buff[row_buff_size];
   snprintf(row_buff, row_buff_size,
@@ -97,12 +97,12 @@ void list(const string username, const string tag, const unsigned int *ids,
       h_usr_len,
       row_suffix);
   char command[h_cmd_len + 1];
-  const string const row_format = strdup(row_buff);
+  cstring const row_format = strdup(row_buff);
   for (i = 0; i < uron_c; i++) {
     struct uron_struct *uron = urons[i];
     struct cron_struct *cron = (*uron).cron;
     string tagx;
-    tagstox(&tagx, (const string *) (*uron).tags, (*uron).tag_n);
+    tagstox(&tagx, (cstring *) (*uron).tags, (*uron).tag_n);
     strncpy(command, (*cron).command, sizeof(command) - 1);
     command[sizeof(command) - 1] = '\0';
     chars = snprintf(

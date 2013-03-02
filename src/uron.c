@@ -79,7 +79,7 @@ void saveuron(struct uron_struct *uron) {
 
   string cronx, tagx;
   crontox(&cronx, (*uron).cron);
-  tagstox(&tagx, (const string *) (*uron).tags, (*uron).tag_n);
+  tagstox(&tagx, (cstring *) (*uron).tags, (*uron).tag_n);
 
   char line[URON_LINE_MAX + 1];
   int len = snprintf(line, sizeof(line), "%d %s %s", (*uron).id, tagx, cronx);
@@ -116,7 +116,7 @@ struct uron_struct * makeuron(struct cron_struct *cron) {
 }
 
 struct uron_struct * geturon(string s) {
-  const string p = "^([0-9]+)[[:space:]]{1}([^[:space:]]*)[[:space:]]{1}([^\r\n]+)[[:space:]]*$";
+  cstring p = "^([0-9]+)[[:space:]]{1}([^[:space:]]*)[[:space:]]{1}([^\r\n]+)[[:space:]]*$";
   string *match;
   int match_c = regmatch(&match, s, p, 4);
   if (match_c != 4) {
@@ -125,8 +125,8 @@ struct uron_struct * geturon(string s) {
   }
   unsigned int id;
   sscanf(match[1], "%d", &id);
-  const string tagx = match[2];
-  const string cronx = match[3];
+  cstring tagx = match[2];
+  cstring cronx = match[3];
 
   struct cron_struct *cron = getcron(cronx);
   string *tags;
@@ -204,12 +204,12 @@ int ided(const struct uron_struct *uron, const unsigned int *ids, int n) {
   return 0;
 }
 
-int owned(const struct uron_struct *uron, const string username) {
+int owned(const struct uron_struct *uron, cstring username) {
   return strcmp((*(*uron).cron).username, username) == 0 ? 1 : 0;
 }
 
-int geturons(struct uron_struct ***urons, const string username, const string tag, 
-    const unsigned int *ids, int n, const string cron_dir) {
+int geturons(struct uron_struct ***urons, cstring username, cstring tag, 
+    const unsigned int *ids, int n, cstring cron_dir) {
   struct cron_struct **crons;
   int cron_c = dgetcrons(&crons, cron_dir);
   struct uron_struct **tmp_urons; 

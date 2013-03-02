@@ -7,5 +7,6 @@
 #define URON_TYPES_H
 
 typedef char * string;
+typedef const string cstring;
 
 #endif /* URON_TYPES_H */

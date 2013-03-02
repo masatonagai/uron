@@ -42,7 +42,7 @@ void regmatchfree(string **match, int match_c) {
   free(*match);
 }
 
-int regmatch(string **match, const string s, const string pattern, int max) {
+int regmatch(string **match, cstring s, cstring pattern, int max) {
   (*match) = (string *) xmalloc(sizeof(string) * max);
 
   regex_t regex;

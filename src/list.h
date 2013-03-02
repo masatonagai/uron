@@ -8,7 +8,7 @@
 
 #include "types.h"
 
-void list(const string username, const string tag, const unsigned int *ids, 
-    int n, const string cron_dir);
+void list(cstring username, cstring tag, const unsigned int *ids, 
+    int n, cstring cron_dir);
 
 #endif /* URON_LIST_H */

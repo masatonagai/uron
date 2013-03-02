@@ -23,7 +23,7 @@ int getfpaths(string **paths, string dirname) {
     char path[PATH_MAX];
     while ((entry = readdir(dir)) != NULL) {
       if ((*entry).d_type == DT_REG) {
-        const string filename = (*entry).d_name;
+        cstring filename = (*entry).d_name;
         if (*filename != '.') {
           file_c++;
           snprintf(path, PATH_MAX, "%s/%s", dirname, filename);
