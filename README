@@ -1,0 +1,31 @@
+WHAT IS URON?
+-------------
+
+Uron is a tool that works as a frontend for Cron
+and add more power to your job management like 
+grouping, dynamic execution, better readability, etc.
+
+
+USAGE
+-----
+
+Usage? 
+
+    uron --help
+
+That's it!
+
+
+SETUP
+-----
+
+Uron uses Cron for its backend. So what you have to
+do is installing Cron.
+
+
+COPYRIGHT
+---------
+
+Uron is maintained by Masato Nagai (masato.nagai@gree.net)
+
+
