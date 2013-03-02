@@ -4,6 +4,8 @@
  */
 
 #include "exec.h"
+#include "uron.h"
+#include "types.h"
 
 #include <limits.h>
 #include <string.h>
@@ -11,8 +13,6 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <unistd.h>
-
-#include "uron.h"
 
 static void run_command(const struct uron_struct *uron) {
   struct passwd p, *result;
@@ -26,8 +26,8 @@ static void run_command(const struct uron_struct *uron) {
   }
 }
 
-void exec(const char *username, const char *tag, const unsigned int *ids,
-    int n, const char *cron_dir) {
+void exec(const string username, const string tag, const unsigned int *ids,
+    int n, const string cron_dir) {
   struct uron_struct **urons;
   int uron_c = geturons(&urons, username, tag, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {

@@ -6,8 +6,10 @@
 #ifndef URON_IO_H
 #define URON_IO_H
 
-void freefpaths(char ***);
-int getfpaths(char ***, char *);
+#include "types.h"
+
+void freefpaths(string **);
+int getfpaths(string **, string);
 
 
 #endif /* URON_IO_H */

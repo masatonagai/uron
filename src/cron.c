@@ -3,6 +3,10 @@
  *
  */
 
+#include "cron.h"
+#include "types.h"
+#include "util.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -10,8 +14,6 @@
 #include <dirent.h>
 #include <string.h>
 #include <regex.h>
-#include "cron.h"
-#include "util.h"
 
 #define N_MATCH 8
 #define MIN "[0-9*/,-]+"
@@ -24,8 +26,8 @@
 #define CMD "[^\r\n]+"
 #define SP "[[:space:]]"
 
-int crontox(char **cronx, struct cron_struct *cron) {
-  (*cronx) = (char *) xmalloc(LINE_MAX);
+int crontox(string *cronx, struct cron_struct *cron) {
+  (*cronx) = (string) xmalloc(LINE_MAX);
   return snprintf(
       (*cronx),
       LINE_MAX,
@@ -67,8 +69,8 @@ void freecron(struct cron_struct *cron) {
 }
 
 static struct cron_struct * makecron(
-    char *minute, char *hour, char *day_of_month, char *month, char *day_of_week,
-    char *username, char *command) {
+    string minute, string hour, string day_of_month, string month, string day_of_week,
+    string username, string command) {
   struct cron_struct *cron = xmalloc(sizeof(struct cron_struct));
   (*cron).minute = strdup(minute);
   (*cron).hour = strdup(hour);
@@ -80,7 +82,7 @@ static struct cron_struct * makecron(
   return cron;
 }
 
-static int unescape_command(char *unescaped, const char *escaped) {
+static int unescape_command(string unescaped, const string escaped) {
   int unescaped_len = 0;
   for (int i = 0, n = strlen(escaped); i < n; i++) {
     // quote from man of crontab(5):
@@ -95,7 +97,7 @@ static int unescape_command(char *unescaped, const char *escaped) {
   return unescaped_len;
 }
 
-struct cron_struct * getcron(const char *s) {
+struct cron_struct * getcron(const string s) {
   regex_t regex;
   regmatch_t pmatch[N_MATCH];
   char pattern[256];
@@ -113,7 +115,7 @@ struct cron_struct * getcron(const char *s) {
   }
   regfree(&regex);
 
-  char *match[N_MATCH];
+  string match[N_MATCH];
   int match_c;
   for (match_c = 0; match_c < N_MATCH; match_c++) {
     regmatch_t m = pmatch[match_c];
@@ -121,7 +123,7 @@ struct cron_struct * getcron(const char *s) {
       break;
     }
     size_t len = m.rm_eo - m.rm_so;
-    match[match_c] = (char *) xmalloc(len + 1);
+    match[match_c] = (string) xmalloc(len + 1);
     strncpy(match[match_c], s + m.rm_so, len);
     match[match_c][len] = '\0';
   }
@@ -140,7 +142,7 @@ struct cron_struct * getcron(const char *s) {
   return cron;
 }
 
-int dgetcrons(struct cron_struct ***crons, const char *dirname) {
+int dgetcrons(struct cron_struct ***crons, const string dirname) {
   (*crons) = NULL;
   int cron_c = 0;
 
@@ -149,7 +151,7 @@ int dgetcrons(struct cron_struct ***crons, const char *dirname) {
   char path[PATH_MAX];
   while ((entry = readdir(dir)) != NULL) {
     if ((*entry).d_type == DT_REG || (*entry).d_type == DT_LNK) {
-      const char *filename = (*entry).d_name;
+      const string filename = (*entry).d_name;
       if (*filename != '.') {
         snprintf(path, PATH_MAX, "%s/%s", dirname, filename);
         FILE *stream = fopen(path, "r");

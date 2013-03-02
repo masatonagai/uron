@@ -4,6 +4,7 @@
  */
 
 #include "term.h"
+#include "types.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,7 @@ struct term_struct terminfo() {
   /* don't use "columns" or "lines" that are macro defined in term.h */
   int cols = 0;
   int rows = 0;
-  char *s;
+  string s;
   s = getenv("COLUMNS");
   if (s && *s) {
     cols = atoi(s);

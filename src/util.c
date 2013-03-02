@@ -35,15 +35,15 @@ void * xrealloc(void *p, size_t size) {
   return np;
 }
 
-void regmatchfree(char ***match, int match_c) {
+void regmatchfree(string **match, int match_c) {
   for (int i = 0; i < match_c; i++) {
     free((*match)[i]);
   }
   free(*match);
 }
 
-int regmatch(char ***match, const char *s, const char *pattern, int max) {
-  (*match) = (char **) xmalloc(sizeof(char *) * max);
+int regmatch(string **match, const string s, const string pattern, int max) {
+  (*match) = (string *) xmalloc(sizeof(string) * max);
 
   regex_t regex;
   regmatch_t pmatch[max];
@@ -65,7 +65,7 @@ int regmatch(char ***match, const char *s, const char *pattern, int max) {
       break;
     }
     size_t len = m.rm_eo - m.rm_so;
-    (*match)[match_c] = (char *) xmalloc(len + 1);
+    (*match)[match_c] = (string) xmalloc(len + 1);
     strncpy((*match)[match_c], s + m.rm_so, len);
     (*match)[match_c][len] = '\0';
   }

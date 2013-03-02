@@ -10,11 +10,11 @@
 #include <dirent.h>
 #include "util.h"
 
-void freefpaths(char ***fpaths) {
+void freefpaths(string **fpaths) {
   free(fpaths);
 }
 
-int getfpaths(char ***paths, char *dirname) {
+int getfpaths(string **paths, string dirname) {
   (*paths) = NULL;
   int file_c = 0;
   DIR *dir = opendir(dirname);
@@ -23,11 +23,11 @@ int getfpaths(char ***paths, char *dirname) {
     char path[PATH_MAX];
     while ((entry = readdir(dir)) != NULL) {
       if ((*entry).d_type == DT_REG) {
-        const char *filename = (*entry).d_name;
+        const string filename = (*entry).d_name;
         if (*filename != '.') {
           file_c++;
           snprintf(path, PATH_MAX, "%s/%s", dirname, filename);
-          (*paths) = xrealloc(*paths, sizeof(char *) * file_c);
+          (*paths) = xrealloc(*paths, sizeof(string) * file_c);
           (*paths)[file_c - 1] = path;
         }
       }

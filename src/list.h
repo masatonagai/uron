@@ -6,7 +6,9 @@
 #ifndef URON_LIST_H
 #define URON_LIST_H
 
-void list(const char *username, const char *tag, const unsigned int *ids, 
-    int n, const char *cron_dir);
+#include "types.h"
+
+void list(const string username, const string tag, const unsigned int *ids, 
+    int n, const string cron_dir);
 
 #endif /* URON_LIST_H */

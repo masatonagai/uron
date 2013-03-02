@@ -4,6 +4,13 @@
  */
 
 #include "uron.h"
+#include "types.h"
+#include "cron.h"
+#include "path.h"
+#include "util.h"
+#include "term.h"
+#include "io.h"
+#include "tag.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,12 +22,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include "cron.h"
-#include "path.h"
-#include "util.h"
-#include "term.h"
-#include "io.h"
-#include "tag.h"
 
 #define URON_LINE_MAX 512 /* includes newline character */
 #define URON_LINE_PADCHAR '\r'
@@ -36,7 +37,7 @@ static struct uron_struct * getlasturon(int fd) {
   if (eof > 0) {
     off_t o = lseek(fd, (off_t) (eof - URON_LINE_MAX), SEEK_SET);
     if (o >= 0) {
-      char *luronx = (char *) xmalloc(URON_LINE_MAX);
+      string luronx = (string) xmalloc(URON_LINE_MAX);
       read(fd, luronx, URON_LINE_MAX);
       struct uron_struct *luron = geturon(luronx);
       free(luronx);
@@ -76,9 +77,9 @@ void saveuron(struct uron_struct *uron) {
     lseek(fd, (off_t) (URON_LINE_MAX * ((*uron).id - URON_ID_MIN)), SEEK_SET);
   }
 
-  char *cronx, *tagx;
+  string cronx, tagx;
   crontox(&cronx, (*uron).cron);
-  tagstox(&tagx, (const char **) (*uron).tags, (*uron).tag_n);
+  tagstox(&tagx, (const string *) (*uron).tags, (*uron).tag_n);
 
   char line[URON_LINE_MAX + 1];
   int len = snprintf(line, sizeof(line), "%d %s %s", (*uron).id, tagx, cronx);
@@ -114,9 +115,9 @@ struct uron_struct * makeuron(struct cron_struct *cron) {
   return uron;
 }
 
-struct uron_struct * geturon(char *s) {
-  const char *p = "^([0-9]+)[[:space:]]{1}([^[:space:]]*)[[:space:]]{1}([^\r\n]+)[[:space:]]*$";
-  char **match;
+struct uron_struct * geturon(string s) {
+  const string p = "^([0-9]+)[[:space:]]{1}([^[:space:]]*)[[:space:]]{1}([^\r\n]+)[[:space:]]*$";
+  string *match;
   int match_c = regmatch(&match, s, p, 4);
   if (match_c != 4) {
     regmatchfree(&match, match_c);
@@ -124,11 +125,11 @@ struct uron_struct * geturon(char *s) {
   }
   unsigned int id;
   sscanf(match[1], "%d", &id);
-  const char *tagx = match[2];
-  const char *cronx = match[3];
+  const string tagx = match[2];
+  const string cronx = match[3];
 
   struct cron_struct *cron = getcron(cronx);
-  char **tags;
+  string *tags;
   int tag_n = gettags(&tags, tagx);
 
   regmatchfree(&match, match_c);
@@ -166,13 +167,13 @@ int fgeturons(struct uron_struct ***urons, FILE *stream) {
 
 int dgeturons(struct uron_struct ***urons) {
   (*urons) = NULL;
-  char **paths;
+  string *paths;
   int file_c = getfpaths(&paths, URON_DIR);
 
   int uron_c = 0;
   int i;
   for (i = 0; i < file_c; i++) {
-    char *path = paths[i];
+    string path = paths[i];
     FILE *stream = fopen(path, "r");
     if (!stream) {
       fprintf(stderr, "failed: open %s\n", path);
@@ -203,12 +204,12 @@ int ided(const struct uron_struct *uron, const unsigned int *ids, int n) {
   return 0;
 }
 
-int owned(const struct uron_struct *uron, const char *username) {
+int owned(const struct uron_struct *uron, const string username) {
   return strcmp((*(*uron).cron).username, username) == 0 ? 1 : 0;
 }
 
-int geturons(struct uron_struct ***urons, const char *username, const char *tag, 
-    const unsigned int *ids, int n, const char *cron_dir) {
+int geturons(struct uron_struct ***urons, const string username, const string tag, 
+    const unsigned int *ids, int n, const string cron_dir) {
   struct cron_struct **crons;
   int cron_c = dgetcrons(&crons, cron_dir);
   struct uron_struct **tmp_urons; 

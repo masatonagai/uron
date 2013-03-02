@@ -4,6 +4,7 @@
  */
 
 #include "uron.h"
+#include "types.h"
 #include "path.h"
 #include "util.h"
 #include "list.h"
@@ -14,8 +15,7 @@
 #include <getopt.h>
 
 enum command {
-  help_command, list_command, tag_command, untag_command,
-  exec_command
+  help_command, list_command, add_command, remove_command, exec_command
 };
 
 static void help() {
@@ -37,7 +37,7 @@ static void help() {
   exit(EXIT_FAILURE);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, string *argv) {
   struct option long_opts[] = {
     { "help",    no_argument,        0, 'h' },
     { "list",    no_argument,        0, 'l' },
@@ -51,10 +51,10 @@ int main(int argc, char **argv) {
   };
 
   enum command cmd = help_command;
-  char *cron_dir = CRON_DIR;
-  char *tag_for_write = NULL;
-  char *tag_for_read = NULL;
-  char *username = NULL;
+  string cron_dir = CRON_DIR;
+  string tag_for_write = NULL;
+  string tag_for_read = NULL;
+  string username = NULL;
   for (;;) {
     int index;
     int c = getopt_long(argc, argv, "hlxa:r:d:u:t:n", long_opts, &index);
@@ -67,11 +67,11 @@ int main(int argc, char **argv) {
         cmd = list_command;
         break;
       case 'a':
-        cmd = tag_command;
+        cmd = add_command;
         tag_for_write = optarg;
         break;
       case 'r':
-        cmd = untag_command;
+        cmd = remove_command;
         tag_for_write = optarg;
         break;
       case 'x':
@@ -111,10 +111,10 @@ int main(int argc, char **argv) {
     case help_command:
       help();
       break;
-    case tag_command:
+    case add_command:
       addtag(tag_for_write, username, tag_for_read, uron_ids, n, cron_dir);
       break;
-    case untag_command:
+    case remove_command:
       rmtag(tag_for_write, username, tag_for_read, uron_ids, n, cron_dir);
       break;
     case list_command:
