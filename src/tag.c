@@ -10,16 +10,16 @@
 
 #include <string.h>
 
-int tagged(const struct uron_struct *uron, cstring tag) {
+bool tagged(const struct uron_struct *uron, cstring tag) {
   if (strcmp(tag, URON_NO_TAGS) == 0) {
-    return (*uron).tag_n == 0 ? 1 : 0;
+    return (*uron).tag_n == 0;
   }
   for (int i = 0, n = (*uron).tag_n; i < n; i++) {
     if (strcmp((*uron).tags[i], tag) == 0) {
-      return 1;
+      return true;
     }
   }
-  return 0;
+  return false;
 }
 
 int tagstox(string *tagx, cstring *tags, int tag_n) {

@@ -195,17 +195,17 @@ int dgeturons(struct uron_struct ***urons) {
   return uron_c;
 }
 
-int ided(const struct uron_struct *uron, const unsigned int *ids, int n) {
+bool ided(const struct uron_struct *uron, const unsigned int *ids, int n) {
   for (int i = 0; i < n; i++) {
     if ((*uron).id == ids[i]) {
-      return 1;
+      return true;
     }
   }
-  return 0;
+  return false;
 }
 
-int owned(const struct uron_struct *uron, cstring username) {
-  return strcmp((*(*uron).cron).username, username) == 0 ? 1 : 0;
+bool owned(const struct uron_struct *uron, cstring username) {
+  return strcmp((*(*uron).cron).username, username) == 0;
 }
 
 int geturons(struct uron_struct ***urons, cstring username, cstring tag, 

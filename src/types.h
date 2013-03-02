@@ -8,5 +8,6 @@
 
 typedef char * string;
 typedef const string cstring;
+typedef enum { false, true } bool;
 
 #endif /* URON_TYPES_H */

@@ -19,6 +19,6 @@ void rmtag(cstring tag, cstring username, cstring tag_for_read,
     const unsigned int *ids, int n, cstring cron_dir);
 int tagstox(string *, cstring *, int);
 int gettags(string **, cstring);
-int tagged(const struct uron_struct *, cstring);
+bool tagged(const struct uron_struct *, cstring);
 
 #endif /* URON_TAG_H */

@@ -41,9 +41,9 @@ int crontox(string *cronx, struct cron_struct *cron) {
       (*cron).command);
 }
 
-int eqcron(struct cron_struct *a, struct cron_struct *b) {
+bool eqcron(struct cron_struct *a, struct cron_struct *b) {
   if (a == b) {
-    return 1;
+    return true;
   }
   if (strcmp((*a).minute, (*b).minute) == 0 &&
       strcmp((*a).hour, (*b).hour) == 0 &&
@@ -52,9 +52,9 @@ int eqcron(struct cron_struct *a, struct cron_struct *b) {
       strcmp((*a).day_of_week, (*b).day_of_week) == 0 &&
       strcmp((*a).username, (*b).username) == 0 &&
       strcmp((*a).command, (*b).command) == 0) {
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 
 void freecron(struct cron_struct *cron) {
