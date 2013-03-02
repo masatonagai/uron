@@ -14,9 +14,9 @@
 #include <stdlib.h>
 #include <getopt.h>
 
-enum command {
+typedef enum command_e {
   help_command, list_command, add_command, remove_command, exec_command
-};
+} command_t;
 
 static void help() {
   fprintf(stderr,
@@ -37,7 +37,7 @@ static void help() {
   exit(EXIT_FAILURE);
 }
 
-int main(int argc, string *argv) {
+int main(int argc, string_t *argv) {
   struct option long_opts[] = {
     { "help",    no_argument,        0, 'h' },
     { "list",    no_argument,        0, 'l' },
@@ -50,11 +50,11 @@ int main(int argc, string *argv) {
     { "dir",     required_argument,  0, 'd' }
   };
 
-  enum command cmd = help_command;
-  string cron_dir = CRON_DIR;
-  string tag_for_write = NULL;
-  string tag_for_read = NULL;
-  string username = NULL;
+  command_t cmd = help_command;
+  string_t cron_dir = CRON_DIR;
+  string_t tag_for_write = NULL;
+  string_t tag_for_read = NULL;
+  string_t username = NULL;
   for (;;) {
     int index;
     int c = getopt_long(argc, argv, "hlxa:r:d:u:t:n", long_opts, &index);

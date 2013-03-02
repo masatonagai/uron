@@ -10,21 +10,21 @@
 
 #include <stdio.h>
 
-typedef struct cron_struct {
-  string minute;
-  string hour;
-  string day_of_month;
-  string month;
-  string day_of_week;
-  string username;
-  string command;
-} Cron;
+typedef struct cron_s {
+  string_t minute;
+  string_t hour;
+  string_t day_of_month;
+  string_t month;
+  string_t day_of_week;
+  string_t username;
+  string_t command;
+} cron_t;
 
-int dgetcrons(Cron ***, cstring);
-int fgetcrons(Cron ***, FILE *);
-Cron * getcron(cstring);
-void freecron(Cron *);
-bool eqcron(Cron *, Cron *);
-int crontox(string *, Cron *);
+int dgetcrons(cron_t ***, const string_t);
+int fgetcrons(cron_t ***, FILE *);
+cron_t * getcron(const string_t);
+void freecron(cron_t *);
+bool eqcron(cron_t *, cron_t *);
+int crontox(string_t *, cron_t *);
 
 #endif /* URON_CRON_H */

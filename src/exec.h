@@ -8,7 +8,7 @@
 
 #include "types.h"
 
-void exec(cstring username, cstring tag, const unsigned int *ids, 
-    int n, cstring cron_dir);
+void exec(const string_t username, const string_t tag, const unsigned int *ids, 
+    int n, const string_t cron_dir);
 
 #endif /* URON_EXEC_H */

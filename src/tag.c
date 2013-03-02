@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-bool tagged(const Uron *uron, cstring tag) {
+bool tagged(const uron_t *uron, const string_t tag) {
   if (strcmp(tag, URON_NO_TAGS) == 0) {
     return (*uron).tag_n == 0;
   }
@@ -22,8 +22,8 @@ bool tagged(const Uron *uron, cstring tag) {
   return false;
 }
 
-int tagstox(string *tagx, cstring *tags, int tag_n) {
-  (*tagx) = (string) xmalloc(URON_TAG_MAX);
+int tagstox(string_t *tagx, const string_t *tags, int tag_n) {
+  (*tagx) = (string_t) xmalloc(URON_TAG_MAX);
   size_t max_n = URON_TAG_MAX;
   int i;
   for (i = 0; i < tag_n; i++) {
@@ -37,15 +37,15 @@ int tagstox(string *tagx, cstring *tags, int tag_n) {
   return strlen(*tagx);
 }
 
-int gettags(string **tags, cstring tagx) {
+int gettags(string_t **tags, const string_t tagx) {
   (*tags) = NULL;
-  string pch;
+  string_t pch;
   int tag_n = 0;
-  string _tagx = (string) xmalloc(strlen(tagx) + 1);
+  string_t _tagx = (string_t) xmalloc(strlen(tagx) + 1);
   strncpy(_tagx, tagx, strlen(tagx));
   pch = strtok(_tagx, URON_TAG_SP);
   while (pch != NULL) {
-    (*tags) = (string *) xrealloc((*tags), sizeof(string) * (tag_n + 1));
+    (*tags) = (string_t *) xrealloc((*tags), sizeof(string_t) * (tag_n + 1));
     (*tags)[tag_n] = pch;
     tag_n++;
     pch = strtok(NULL, URON_TAG_SP);
@@ -53,19 +53,19 @@ int gettags(string **tags, cstring tagx) {
   return tag_n;
 }
 
-void addtag(cstring tag_for_write, cstring username, cstring tag_for_read,
-    const unsigned int *ids, int n, cstring cron_dir) {
+void addtag(const string_t tag_for_write, const string_t username, const string_t tag_for_read,
+    const unsigned int *ids, int n, const string_t cron_dir) {
   if (tag_for_read && strcmp(tag_for_write, tag_for_read) == 0) {
     // already tagged
     return;
   }
-  // TODO throw error if the tag contains space string
-  Uron **urons;
+  // TODO throw error if the tag contains space string_t
+  uron_t **urons;
   int uron_c = geturons(&urons, username, tag_for_read, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {
-    Uron *uron = urons[i];
+    uron_t *uron = urons[i];
     (*uron).tag_n++;
-    (*uron).tags = (string *) xrealloc((*uron).tags, sizeof(string) * ((*uron).tag_n));
+    (*uron).tags = (string_t *) xrealloc((*uron).tags, sizeof(string_t) * ((*uron).tag_n));
     (*uron).tags[(*uron).tag_n - 1] = strdup(tag_for_write);
     saveuron(uron);
     freeuron(uron);
@@ -73,15 +73,15 @@ void addtag(cstring tag_for_write, cstring username, cstring tag_for_read,
   free(urons);
 }
 
-void rmtag(cstring tag_for_write, cstring username, cstring tag_for_read,
-    const unsigned int *ids, int n, cstring cron_dir) {
-  Uron **urons;
+void rmtag(const string_t tag_for_write, const string_t username, const string_t tag_for_read,
+    const unsigned int *ids, int n, const string_t cron_dir) {
+  uron_t **urons;
   int uron_c = geturons(&urons, username, tag_for_read, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {
-    Uron *uron = urons[i];
+    uron_t *uron = urons[i];
     for (int k = 0; k < (*uron).tag_n; k++) {
       if (strcmp((*uron).tags[k], tag_for_write) == 0) {
-        string removed_tag = (*uron).tags[k];
+        string_t removed_tag = (*uron).tags[k];
         for (int l = k + 1; l < (*uron).tag_n; l++) {
           (*uron).tags[l - 1] = strdup((*uron).tags[l]);
         }

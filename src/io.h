@@ -8,8 +8,8 @@
 
 #include "types.h"
 
-void freefpaths(string **);
-int getfpaths(string **, string);
+void freefpaths(string_t **);
+int getfpaths(string_t **, string_t);
 
 
 #endif /* URON_IO_H */

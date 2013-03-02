@@ -8,7 +8,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -18,7 +17,7 @@ struct term_struct terminfo() {
   /* don't use "columns" or "lines" that are macro defined in term.h */
   int cols = 0;
   int rows = 0;
-  string s;
+  string_t s;
   s = getenv("COLUMNS");
   if (s && *s) {
     cols = atoi(s);

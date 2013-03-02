@@ -6,8 +6,10 @@
 #ifndef URON_TYPES_H
 #define URON_TYPES_H
 
-typedef char * string;
-typedef const string cstring;
-typedef enum { false, true } bool;
+#include <stdbool.h>
+// typedef enum { false, true } bool;
+#include <sys/types.h>
+
+typedef char * string_t;
 
 #endif /* URON_TYPES_H */
