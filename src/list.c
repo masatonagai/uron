@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2013 Masato Nagai
+ *
+ */
+
 #include "list.h"
 
 #include <stdio.h>

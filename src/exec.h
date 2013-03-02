@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2013 Masato Nagai
+ *
+ */
+
 #ifndef URON_EXEC_H
 #define URON_EXEC_H
 

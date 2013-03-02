@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2013 Masato Nagai
+ *
+ */
+
 #ifndef URON_CRON_H
 #define URON_CRON_H
 

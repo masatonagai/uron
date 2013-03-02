@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2013 Masato Nagai
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>

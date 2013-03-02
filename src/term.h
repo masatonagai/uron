@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2013 Masato Nagai
+ *
+ */
+
 #ifndef URON_TERM_H
 #define URON_TERM_H
 
