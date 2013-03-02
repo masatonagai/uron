@@ -31,7 +31,7 @@
 
 void list(cstring username, cstring tag, const unsigned int *ids, 
     int n, cstring cron_dir) {
-  struct uron_struct **urons;
+  Uron **urons;
   int uron_c = geturons(&urons, username, tag, ids, n, cron_dir);
 
   printf("TOTAL: %d\n", uron_c);
@@ -51,8 +51,8 @@ void list(cstring username, cstring tag, const unsigned int *ids,
   char id[11 + 1];
   int i;
   for (i = 0; i < uron_c; i++) {
-    struct uron_struct *uron = urons[i];
-    struct cron_struct *cron = (*uron).cron;
+    Uron *uron = urons[i];
+    Cron *cron = (*uron).cron;
     string tagx;
     h_id_len = MAX(h_id_len, sprintf(id, "%u", (*uron).id));
     h_tag_len = MAX(h_tag_len, tagstox(&tagx, (cstring *) (*uron).tags, (*uron).tag_n));
@@ -99,8 +99,8 @@ void list(cstring username, cstring tag, const unsigned int *ids,
   char command[h_cmd_len + 1];
   cstring const row_format = strdup(row_buff);
   for (i = 0; i < uron_c; i++) {
-    struct uron_struct *uron = urons[i];
-    struct cron_struct *cron = (*uron).cron;
+    Uron *uron = urons[i];
+    Cron *cron = (*uron).cron;
     string tagx;
     tagstox(&tagx, (cstring *) (*uron).tags, (*uron).tag_n);
     strncpy(command, (*cron).command, sizeof(command) - 1);

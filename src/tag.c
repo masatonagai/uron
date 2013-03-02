@@ -10,7 +10,7 @@
 
 #include <string.h>
 
-bool tagged(const struct uron_struct *uron, cstring tag) {
+bool tagged(const Uron *uron, cstring tag) {
   if (strcmp(tag, URON_NO_TAGS) == 0) {
     return (*uron).tag_n == 0;
   }
@@ -60,10 +60,10 @@ void addtag(cstring tag_for_write, cstring username, cstring tag_for_read,
     return;
   }
   // TODO throw error if the tag contains space string
-  struct uron_struct **urons;
+  Uron **urons;
   int uron_c = geturons(&urons, username, tag_for_read, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {
-    struct uron_struct *uron = urons[i];
+    Uron *uron = urons[i];
     (*uron).tag_n++;
     (*uron).tags = (string *) xrealloc((*uron).tags, sizeof(string) * ((*uron).tag_n));
     (*uron).tags[(*uron).tag_n - 1] = strdup(tag_for_write);
@@ -75,10 +75,10 @@ void addtag(cstring tag_for_write, cstring username, cstring tag_for_read,
 
 void rmtag(cstring tag_for_write, cstring username, cstring tag_for_read,
     const unsigned int *ids, int n, cstring cron_dir) {
-  struct uron_struct **urons;
+  Uron **urons;
   int uron_c = geturons(&urons, username, tag_for_read, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {
-    struct uron_struct *uron = urons[i];
+    Uron *uron = urons[i];
     for (int k = 0; k < (*uron).tag_n; k++) {
       if (strcmp((*uron).tags[k], tag_for_write) == 0) {
         string removed_tag = (*uron).tags[k];

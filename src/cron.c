@@ -26,7 +26,7 @@
 #define CMD "[^\r\n]+"
 #define SP "[[:space:]]"
 
-int crontox(string *cronx, struct cron_struct *cron) {
+int crontox(string *cronx, Cron *cron) {
   (*cronx) = (string) xmalloc(LINE_MAX);
   return snprintf(
       (*cronx),
@@ -41,7 +41,7 @@ int crontox(string *cronx, struct cron_struct *cron) {
       (*cron).command);
 }
 
-bool eqcron(struct cron_struct *a, struct cron_struct *b) {
+bool eqcron(Cron *a, Cron *b) {
   if (a == b) {
     return true;
   }
@@ -57,7 +57,7 @@ bool eqcron(struct cron_struct *a, struct cron_struct *b) {
   return false;
 }
 
-void freecron(struct cron_struct *cron) {
+void freecron(Cron *cron) {
   free((*cron).minute);
   free((*cron).hour);
   free((*cron).day_of_month);
@@ -68,10 +68,10 @@ void freecron(struct cron_struct *cron) {
   free(cron);
 }
 
-static struct cron_struct * makecron(
+static Cron * makecron(
     string minute, string hour, string day_of_month, string month, string day_of_week,
     string username, string command) {
-  struct cron_struct *cron = xmalloc(sizeof(struct cron_struct));
+  Cron *cron = xmalloc(sizeof(Cron));
   (*cron).minute = strdup(minute);
   (*cron).hour = strdup(hour);
   (*cron).day_of_month = strdup(day_of_month);
@@ -97,7 +97,7 @@ static int unescape_command(string unescaped, cstring escaped) {
   return unescaped_len;
 }
 
-struct cron_struct * getcron(cstring s) {
+Cron * getcron(cstring s) {
   regex_t regex;
   regmatch_t pmatch[N_MATCH];
   char pattern[256];
@@ -132,7 +132,7 @@ struct cron_struct * getcron(cstring s) {
   }
   char command[strlen(match[7]) + 1];
   unescape_command(command, match[7]);
-  struct cron_struct *cron = makecron(
+  Cron *cron = makecron(
       match[1], match[2], match[3], match[4], match[5],
       match[6], command);
   int i;
@@ -142,7 +142,7 @@ struct cron_struct * getcron(cstring s) {
   return cron;
 }
 
-int dgetcrons(struct cron_struct ***crons, cstring dirname) {
+int dgetcrons(Cron ***crons, cstring dirname) {
   (*crons) = NULL;
   int cron_c = 0;
 
@@ -159,14 +159,14 @@ int dgetcrons(struct cron_struct ***crons, cstring dirname) {
           fprintf(stderr, "failed: open %s\n", path);
           continue;
         }
-        struct cron_struct **_crons;
+        Cron **_crons;
         int _cron_c = fgetcrons(&_crons, stream);
         (*crons) =
-          (struct cron_struct **)
+          (Cron **)
           xrealloc(
             (*crons),
-            sizeof(struct cron_struct *) * (cron_c + _cron_c));
-        memcpy((*crons) + cron_c, _crons, sizeof(struct cron_struct *) * _cron_c);
+            sizeof(Cron *) * (cron_c + _cron_c));
+        memcpy((*crons) + cron_c, _crons, sizeof(Cron *) * _cron_c);
         free(_crons);
         cron_c += _cron_c;
         fclose(stream);
@@ -177,7 +177,7 @@ int dgetcrons(struct cron_struct ***crons, cstring dirname) {
   return cron_c;
 }
 
-int fgetcrons(struct cron_struct ***crons, FILE *stream) {
+int fgetcrons(Cron ***crons, FILE *stream) {
   (*crons) = NULL;
   char line[LINE_MAX];
   int cron_c = 0;
@@ -185,15 +185,15 @@ int fgetcrons(struct cron_struct ***crons, FILE *stream) {
     if (fgets(line, LINE_MAX, stream) == NULL) {
       break;
     }
-    struct cron_struct *cron = getcron(line);
+    Cron *cron = getcron(line);
     if (cron == NULL) {
       continue;
     }
     (*crons) =
-      (struct cron_struct **)
+      (Cron **)
       xrealloc(
         (*crons),
-        sizeof(struct cron_struct *) * (cron_c + 1));
+        sizeof(Cron *) * (cron_c + 1));
     (*crons)[cron_c] = cron;
     cron_c++;
   }

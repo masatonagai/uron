@@ -9,20 +9,20 @@
 #include "types.h"
 #include "cron.h"
 
-struct uron_struct {
+typedef struct uron_struct {
   unsigned int id;
   size_t tag_n;
   string *tags;
-  struct cron_struct *cron;
-};
+  Cron *cron;
+} Uron;
 
-void freeuron(struct uron_struct *);
-void saveuron(struct uron_struct *);
-struct uron_struct * makeuron(struct cron_struct *);
-struct uron_struct * geturon(string);
-int fgeturons(struct uron_struct ***, FILE *);
-int dgeturons(struct uron_struct ***urons);
-int geturons(struct uron_struct ***urons, cstring username, cstring tag, 
+void freeuron(Uron *);
+void saveuron(Uron *);
+Uron * makeuron(Cron *);
+Uron * geturon(string);
+int fgeturons(Uron ***, FILE *);
+int dgeturons(Uron ***urons);
+int geturons(Uron ***urons, cstring username, cstring tag, 
     const unsigned int *ids, int n, cstring cron_dir);
 
 #endif /* URON_H */

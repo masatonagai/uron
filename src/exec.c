@@ -14,7 +14,7 @@
 #include <pwd.h>
 #include <unistd.h>
 
-static void run_command(const struct uron_struct *uron) {
+static void run_command(const Uron *uron) {
   struct passwd p, *result;
   char buff[sysconf(_SC_GETPW_R_SIZE_MAX)];
   if (getpwnam_r((*(*uron).cron).username, &p, buff, sizeof(buff), &result) != 0) {
@@ -28,7 +28,7 @@ static void run_command(const struct uron_struct *uron) {
 
 void exec(cstring username, cstring tag, const unsigned int *ids,
     int n, cstring cron_dir) {
-  struct uron_struct **urons;
+  Uron **urons;
   int uron_c = geturons(&urons, username, tag, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {
     run_command(urons[i]);

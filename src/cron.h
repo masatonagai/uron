@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-struct cron_struct {
+typedef struct cron_struct {
   string minute;
   string hour;
   string day_of_month;
@@ -18,13 +18,13 @@ struct cron_struct {
   string day_of_week;
   string username;
   string command;
-};
+} Cron;
 
-int dgetcrons(struct cron_struct ***, cstring);
-int fgetcrons(struct cron_struct ***, FILE *);
-struct cron_struct * getcron(cstring);
-void freecron(struct cron_struct *);
-bool eqcron(struct cron_struct *, struct cron_struct *);
-int crontox(string *, struct cron_struct *);
+int dgetcrons(Cron ***, cstring);
+int fgetcrons(Cron ***, FILE *);
+Cron * getcron(cstring);
+void freecron(Cron *);
+bool eqcron(Cron *, Cron *);
+int crontox(string *, Cron *);
 
 #endif /* URON_CRON_H */
