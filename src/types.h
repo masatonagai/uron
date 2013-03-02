@@ -7,7 +7,8 @@
 #define URON_TYPES_H
 
 #include <stdbool.h>
-// typedef enum { false, true } bool;
+#include <stdint.h>
+
 #include <sys/types.h>
 
 typedef char * string_t;

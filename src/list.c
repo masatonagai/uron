@@ -29,7 +29,7 @@
 #define H_CMD "CMD"
 
 
-void list(const string_t username, const string_t tag, const unsigned int *ids, 
+void list(const string_t username, const string_t tag, const uint32_t *ids, 
     int n, const string_t cron_dir) {
   uron_t **urons;
   int uron_c = geturons(&urons, username, tag, ids, n, cron_dir);

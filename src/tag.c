@@ -54,7 +54,7 @@ int gettags(string_t **tags, const string_t tagx) {
 }
 
 void addtag(const string_t tag_for_write, const string_t username, const string_t tag_for_read,
-    const unsigned int *ids, int n, const string_t cron_dir) {
+    const uint32_t *ids, int n, const string_t cron_dir) {
   if (tag_for_read && strcmp(tag_for_write, tag_for_read) == 0) {
     // already tagged
     return;
@@ -74,7 +74,7 @@ void addtag(const string_t tag_for_write, const string_t username, const string_
 }
 
 void rmtag(const string_t tag_for_write, const string_t username, const string_t tag_for_read,
-    const unsigned int *ids, int n, const string_t cron_dir) {
+    const uint32_t *ids, int n, const string_t cron_dir) {
   uron_t **urons;
   int uron_c = geturons(&urons, username, tag_for_read, ids, n, cron_dir);
   for (int i = 0; i < uron_c; i++) {

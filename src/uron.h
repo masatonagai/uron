@@ -10,7 +10,7 @@
 #include "cron.h"
 
 typedef struct uron_s {
-  unsigned int id;
+  uint32_t id;
   size_t tag_n;
   string_t *tags;
   cron_t *cron;
@@ -23,6 +23,6 @@ uron_t * geturon(string_t);
 int fgeturons(uron_t ***, FILE *);
 int dgeturons(uron_t ***urons);
 int geturons(uron_t ***urons, const string_t username, const string_t tag, 
-    const unsigned int *ids, int n, const string_t cron_dir);
+    const uint32_t *ids, int n, const string_t cron_dir);
 
 #endif /* URON_H */

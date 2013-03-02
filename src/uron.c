@@ -122,7 +122,7 @@ uron_t * geturon(string_t s) {
     regmatchfree(&match, match_c);
     return NULL;
   }
-  unsigned int id;
+  uint32_t id;
   sscanf(match[1], "%d", &id);
   const string_t tagx = match[2];
   const string_t cronx = match[3];
@@ -194,7 +194,7 @@ int dgeturons(uron_t ***urons) {
   return uron_c;
 }
 
-bool ided(const uron_t *uron, const unsigned int *ids, int n) {
+bool ided(const uron_t *uron, const uint32_t *ids, int n) {
   for (int i = 0; i < n; i++) {
     if ((*uron).id == ids[i]) {
       return true;
@@ -208,7 +208,7 @@ bool owned(const uron_t *uron, const string_t username) {
 }
 
 int geturons(uron_t ***urons, const string_t username, const string_t tag, 
-    const unsigned int *ids, int n, const string_t cron_dir) {
+    const uint32_t *ids, int n, const string_t cron_dir) {
   cron_t **crons;
   int cron_c = dgetcrons(&crons, cron_dir);
   uron_t **tmp_urons; 

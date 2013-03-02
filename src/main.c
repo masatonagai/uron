@@ -96,11 +96,11 @@ int main(int argc, string_t *argv) {
     }
   }
   int n = argc - optind;
-  unsigned int *uron_ids =
-    (unsigned int *) xmalloc(sizeof(unsigned int) * n);
+  uint32_t *uron_ids =
+    (uint32_t *) xmalloc(sizeof(uint32_t) * n);
   if (n > 0) {
     int i, j;
-    unsigned int tmpid;
+    uint32_t tmpid;
     for (i = optind, j = 0; i < argc; i++, j++) {
       sscanf(argv[i], "%u", &tmpid);
       uron_ids[j] = tmpid;
