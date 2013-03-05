@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define URON_LINE_MAX 512 /* includes newline character */
+#define URON_LINE_MAX 1024 /* includes newline character */
 #define URON_LINE_PADCHAR '\r'
 #define URON_ID_MIN 1
 
