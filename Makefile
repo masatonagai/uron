@@ -21,3 +21,6 @@ uron: $(SOURCES)
 install: all
 	mkdir -p $(DESTETC)
 	$(INSTALL) -c -m 755 -o root uron $(DESTBIN)/
+
+clean:
+	rm -f *.o uron
