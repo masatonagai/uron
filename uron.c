@@ -16,11 +16,12 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
-#include <sys/param.h>
-#include <sys/stat.h>
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <sys/file.h>
 
 #define URON_LINE_MAX 1024 /* includes newline character */
 #define URON_LINE_PADCHAR '\r'
@@ -64,6 +65,12 @@ void saveuron(uron_t *uron) {
     exit(EXIT_FAILURE);
   }
 
+  // lock the uron file for preserving uniqueness of id
+  if (flock(fd, LOCK_EX) == -1) {
+    perror("flock");
+    exit(EXIT_FAILURE);
+  }
+
   int add = !(*uron).id;
   if (add) {
     (*uron).id = URON_ID_MIN;
@@ -95,6 +102,10 @@ void saveuron(uron_t *uron) {
   line[URON_LINE_MAX] = '\0';
 
   ssize_t wb = write(fd, line, strlen(line));
+
+  // don't forget unlock the uron file
+  flock(fd, LOCK_UN);
+
   if (wb == -1) {
     perror("write");
     exit(EXIT_FAILURE);
