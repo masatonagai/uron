@@ -5,6 +5,8 @@
 
 DESTROOT = $(DESTDIR)/usr
 DESTBIN	= $(DESTROOT)/bin
+DESTETC = $(DESTDIR)/etc/uron
+
 INSTALL = install -s
 CC = gcc -std=gnu99
 CFLAGS = -g -O0 -Wall
@@ -17,4 +19,5 @@ uron: $(SOURCES)
 	$(CC) $(CFLAGS) -o uron $(SOURCES)
 
 install: all
+	mkdir -p $(DESTETC)
 	$(INSTALL) -c -m 755 -o root uron $(DESTBIN)/

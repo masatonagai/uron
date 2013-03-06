@@ -1,0 +1,10 @@
+#/*
+# * Copyright (C) 2013 Masato Nagai
+# *
+# */
+
+say:
+    make
+
+su and say:
+    make install
