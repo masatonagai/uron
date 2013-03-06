@@ -11,16 +11,20 @@ INSTALL = install -s
 CC = gcc -std=gnu99
 CFLAGS = -g -O0 -Wall
 
-SOURCES = uron.c cron.c exec.c io.c list.c main.c tag.c term.c util.c 
+HEADERS = cron.h exec.h io.h list.h path.h tag.h term.h types.h uron.h util.h
+SOURCES = cron.c exec.c io.c list.c main.c tag.c term.c uron.c util.c 
 
+.PHONY: all
 all: uron
 
-uron: $(SOURCES)
+uron: $(SOURCES) $(HEADERS)
 	$(CC) $(CFLAGS) -o uron $(SOURCES)
 
+.PHONY: install
 install: all
 	mkdir -p $(DESTETC)
 	$(INSTALL) -c -m 755 -o root uron $(DESTBIN)/
 
+.PHONY: clean
 clean:
 	rm -f *.o uron
